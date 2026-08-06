@@ -1,3 +1,46 @@
+/* ===================================================================
+   VARIÁVEIS DE TEMA
+   Todas as cores "neutras" do site (fundo, texto, bordas) vêm daqui, em vez de
+   estarem espalhadas pelo arquivo. É isso que permite o botão de tema (🌙/☀️)
+   trocar a aparência inteira só mudando o atributo data-tema na tag <html>
+   (ver script.js). As cores "de marca" (vermelho de Kanto, dourado de Johto,
+   vermelho de destaque dos botões) ficam de fora de propósito — elas não mudam
+   entre os temas, pois são parte da identidade visual, não do "modo claro/escuro".
+   =================================================================== */
+:root {
+  --fundo: #0f1115;
+  --fundo-elevado: #14161c; /* Selects, campo de busca */
+  --fundo-trilha: #1a1d24; /* Trilha por trás das barras do gráfico de colunas */
+  --fundo-controle: #1c1f27; /* Fundo do bloco de botões (.controles) */
+  --borda-fraca: #1c1f27; /* Separadores bem sutis (cabeçalho, rodapé) */
+  --borda: #232631; /* Bordas de inputs, selects, linhas de grade do SVG */
+  --borda-forte: #2c2f38; /* Borda do bloco de botões, linha de data do gráfico */
+  --texto: #e9e9ee; /* Texto principal */
+  --texto-suave: #cbd5e1; /* Texto secundário, ainda bem legível */
+  --texto-muted: #9ca3af; /* Texto terciário (subtítulos, botão inativo) */
+  --texto-muted-forte: #6b7280; /* Texto quaternário (rodapé, avisos discretos) */
+  --texto-hover: #b8bcc4; /* Nome da coluna quando destacada (hover/busca) */
+  --texto-hover-forte: #d4d6da; /* Valor da coluna quando destacada (hover/busca) */
+}
+
+/* Tema claro: mesma estrutura, valores invertidos. Ativado via JS colocando
+   data-tema="claro" na tag <html> */
+html[data-tema="claro"] {
+  --fundo: #f5f5f7;
+  --fundo-elevado: #ffffff;
+  --fundo-trilha: #e8e8ec;
+  --fundo-controle: #eaeaee;
+  --borda-fraca: #e0e0e5;
+  --borda: #d4d4da;
+  --borda-forte: #c2c2ca;
+  --texto: #16171a;
+  --texto-suave: #33353c;
+  --texto-muted: #5a5c64;
+  --texto-muted-forte: #71737b;
+  --texto-hover: #45474e;
+  --texto-hover-forte: #26272b;
+}
+
 /* Reset básico: remove margens e espaçamentos padrão que o navegador aplica sozinho */
 * {
   margin: 0;
@@ -7,11 +50,12 @@
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif; /* Fonte usada em todo o site */
-  background-color: #0f1115; /* Fundo escuro, fica confortável para gráficos coloridos */
-  color: #e9e9ee; /* Cor do texto, clara para contrastar com o fundo escuro */
+  background-color: var(--fundo);
+  color: var(--texto);
   min-height: 100vh;
   display: flex;
   flex-direction: column; /* Empilha header, conteúdo e footer, nessa ordem */
+  transition: background-color 0.25s ease, color 0.25s ease; /* Suaviza a troca de tema */
 }
 
 /* Usamos o ID (#grafico) em vez da classe porque o className desse elemento é
@@ -31,7 +75,7 @@ body {
   align-items: center;
   gap: 16px;
   padding: 20px 32px;
-  border-bottom: 1px solid #1c1f27; /* Linha sutil separando o cabeçalho do resto */
+  border-bottom: 1px solid var(--borda-fraca);
 }
 
 .cabecalho-textos {
@@ -54,8 +98,15 @@ body {
 }
 
 .subtitulo {
-  color: #9ca3af; /* Cinza claro, texto secundário */
+  color: var(--texto-muted);
   font-size: 0.95rem;
+}
+
+/* Frase dinâmica comparando o total das duas regiões no snapshot atual (ver script.js) */
+.resumo-comparativo {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  margin-top: 4px;
 }
 
 /* Linha discreta com o seletor de data (o "backup" de snapshots antigos) */
@@ -65,15 +116,15 @@ body {
   gap: 6px;
   margin-top: 6px;
   font-size: 0.78rem;
-  color: #6b7280;
+  color: var(--texto-muted-forte);
 }
 
 .atualizado select {
   appearance: none; /* Remove o visual nativo do navegador, mesmo motivo do .botao */
   -webkit-appearance: none;
-  background: #14161c;
-  color: #9ca3af;
-  border: 1px solid #232631;
+  background: var(--fundo-elevado);
+  color: var(--texto-muted);
+  border: 1px solid var(--borda);
   border-radius: 6px;
   padding: 3px 8px;
   font-family: inherit;
@@ -82,7 +133,7 @@ body {
 }
 
 .atualizado select:hover {
-  border-color: #3a3f4d;
+  border-color: var(--borda-forte);
 }
 
 .atualizado select:focus-visible {
@@ -101,15 +152,24 @@ body {
 .proxima-atualizacao {
   margin-top: 4px;
   font-size: 0.78rem;
-  color: #6b7280;
+  color: var(--texto-muted-forte);
+}
+
+/* Agrupa os botões de modo e o botão de tema, para os dois ficarem juntos à direita */
+.cabecalho-controles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Um único bloco arredondado (o "botão"), sem espaço entre as duas metades — daí o
    overflow: hidden, que corta os cantos internos dos botões e deixa só os da pílula externa */
 .controles {
   display: flex;
-  background: #1c1f27;
-  border: 1px solid #2c2f38;
+  background: var(--fundo-controle);
+  border: 1px solid var(--borda-forte);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -118,7 +178,7 @@ body {
   appearance: none; /* Remove o visual nativo que o navegador/sistema aplicaria (a "caixa branca") */
   -webkit-appearance: none; /* Mesma coisa, mas para navegadores baseados em WebKit (Safari) */
   background: transparent;
-  color: #9ca3af; /* Lado não selecionado fica apagado, simbolizando que está desativado */
+  color: var(--texto-muted); /* Lado não selecionado fica apagado, simbolizando que está desativado */
   border: none;
   padding: 9px 22px;
   cursor: pointer;
@@ -131,7 +191,7 @@ body {
 
 /* Ao passar o mouse no lado desativado: ele clareia, sinalizando que é clicável */
 .botao:hover {
-  color: #e9e9ee;
+  color: var(--texto);
 }
 
 /* Ao clicar: um leve encolhimento, dá a sensação tátil de "pressionar" */
@@ -156,6 +216,31 @@ body {
 
 .botao.ativo:hover {
   color: #f5f5f5; /* Já está destacado, então o hover não precisa clarear mais o texto */
+}
+
+/* Botão de alternar tema — redondo, discreto, mesma "família" visual dos outros controles */
+.botao-tema {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 38px;
+  height: 38px;
+  background: var(--fundo-controle);
+  border: 1px solid var(--borda-forte);
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.botao-tema:hover {
+  border-color: #ee1515;
+}
+
+.botao-tema:active {
+  transform: scale(0.92);
 }
 
 /* CONTEÚDO PRINCIPAL: cresce para ocupar o espaço vertical entre header e footer (flex: 1),
@@ -212,7 +297,7 @@ body {
   width: 100%;
   text-align: center;
   font-size: clamp(0.6rem, 1.6vw, 0.78rem);
-  color: #cbd5e1;
+  color: var(--texto-suave);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -222,7 +307,7 @@ body {
 /* Ao passar o mouse em QUALQUER parte da coluna (não só na barra), o nome clareia —
    o seletor é no pai (.linha-grafico:hover) porque o texto não é filho direto da barra */
 .linha-grafico:hover .nome-texto {
-  color: #b8bcc4;
+  color: var(--texto-hover);
 }
 
 /* A "trilha" é o espaço de fundo por onde a barra pode crescer, agora na vertical.
@@ -232,7 +317,7 @@ body {
   width: 100%;
   max-width: 44px; /* Impede que a barra fique enorme em telas muito largas */
   height: clamp(140px, 32vh, 240px); /* A altura se adapta ao tamanho vertical da tela */
-  background-color: #1a1d24; /* Fundo sutil que marca visualmente o "trilho" onde a barra corre */
+  background-color: var(--fundo-trilha);
   border-radius: 6px;
   padding: 3px; /* Esse respiro é o que separa a barra colorida da base da trilha */
   display: flex;
@@ -277,13 +362,13 @@ body {
   left: 50%;
   transform: translateX(-50%); /* Centraliza o texto horizontalmente sobre a barra */
   font-size: 0.7rem;
-  color: #e9e9ee;
+  color: var(--texto);
   white-space: nowrap; /* Impede que o número quebre linha */
   transition: color 0.2s ease;
 }
 
 .linha-grafico:hover .valor-barra {
-  color: #d4d6da;
+  color: var(--texto-hover-forte);
   font-weight: 600;
 }
 
@@ -309,7 +394,7 @@ body {
   text-align: center;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--texto-suave);
   margin-bottom: -4px; /* Aproxima do gráfico, já que o .conteudo já tem gap entre os filhos */
 }
 
@@ -333,9 +418,9 @@ body {
 .busca-jogador {
   appearance: none;
   -webkit-appearance: none;
-  background: #14161c;
-  color: #e9e9ee;
-  border: 1px solid #232631;
+  background: var(--fundo-elevado);
+  color: var(--texto);
+  border: 1px solid var(--borda);
   border-radius: 999px;
   padding: 8px 16px;
   font-family: inherit;
@@ -345,7 +430,7 @@ body {
 }
 
 .busca-jogador::placeholder {
-  color: #6b7280;
+  color: var(--texto-muted-forte);
 }
 
 .busca-jogador:focus-visible {
@@ -382,7 +467,7 @@ body {
 .pizza-titulo {
   font-size: 1rem;
   font-weight: 600;
-  color: #e9e9ee;
+  color: var(--texto);
 }
 
 /* A linha que junta a legenda e a pizza lado a lado */
@@ -420,7 +505,7 @@ body {
 /* Cada fatia da pizza. transform-box: fill-box faz o "scale" do hover girar em torno
    do próprio centro da fatia, em vez do canto do SVG inteiro */
 .fatia-pizza {
-  stroke: #0f1115; /* Um contorno fino escuro separa visualmente as fatias entre si */
+  stroke: var(--fundo); /* Um contorno fino separa visualmente as fatias entre si */
   stroke-width: 1.5;
   cursor: pointer;
   transform-box: fill-box;
@@ -460,12 +545,12 @@ body {
 }
 
 .pizza-rotulo-fundo {
-  fill: #0f1115;
+  fill: var(--fundo);
   opacity: 0.88;
 }
 
 .pizza-rotulo-nome {
-  fill: #e9e9ee;
+  fill: var(--texto);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -473,7 +558,7 @@ body {
 }
 
 .pizza-rotulo-porcentagem {
-  fill: #9ca3af;
+  fill: var(--texto-muted);
   font-family: inherit;
   font-size: 12px;
   text-anchor: middle;
@@ -485,7 +570,7 @@ body {
   flex-direction: column;
   gap: 4px;
   font-size: 0.75rem;
-  color: #cbd5e1;
+  color: var(--texto-suave);
   max-width: 200px;
 }
 
@@ -522,13 +607,13 @@ body {
 
 /* Linhas horizontais de referência no fundo do gráfico (valores) */
 .linha-guia {
-  stroke: #232631;
+  stroke: var(--borda);
   stroke-width: 1;
 }
 
 /* O número escrito ao lado de cada linha horizontal, mostrando a que valor ela corresponde */
 .rotulo-valor {
-  fill: #6b7280;
+  fill: var(--texto-muted-forte);
   font-family: inherit;
   font-size: 17px;
   text-anchor: end; /* O texto termina exatamente onde a linha começa, ficando bem alinhado */
@@ -538,7 +623,7 @@ body {
    Tracejada (dashed) e mais discreta que a linha de valor, para não competir com as
    linhas de evolução (que são o elemento principal do gráfico) */
 .linha-data {
-  stroke: #2c2f38;
+  stroke: var(--borda-forte);
   stroke-width: 1;
   stroke-dasharray: 4 4;
 }
@@ -565,7 +650,7 @@ body {
    suavemente no hover, dando um destaque sutil ao passar o mouse */
 .ponto-evolucao {
   r: 5;
-  stroke: #0f1115;
+  stroke: var(--fundo);
   stroke-width: 2;
   cursor: pointer;
   transition: r 0.2s ease;
@@ -585,7 +670,7 @@ body {
 
 /* Rótulos de data no eixo X, embaixo do gráfico */
 .rotulo-eixo {
-  fill: #9ca3af;
+  fill: var(--texto-muted);
   font-family: inherit;
   font-size: 20px;
   text-anchor: middle; /* Centraliza o texto exatamente sobre a coordenada X do ponto */
@@ -597,7 +682,7 @@ body {
   justify-content: center;
   gap: 24px;
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: var(--texto-suave);
 }
 
 .item-legenda {
@@ -613,8 +698,8 @@ body {
   display: inline-block;
 }
 
-/* SELOS DE VARIAÇÃO (▲/▼ desde a atualização anterior, ou "NOVO" no Top 10) */
-
+/* SELOS DE VARIAÇÃO (▲/▼ desde a atualização anterior, ou "NOVO" no Top 10).
+   Cores semânticas (verde/vermelho/azul) — ficam iguais nos dois temas de propósito */
 .selo-variacao {
   font-size: 0.6rem;
   font-weight: 700;
@@ -624,18 +709,18 @@ body {
 }
 
 .selo-alta {
-  color: #4ade80;
-  background: rgba(74, 222, 128, 0.14);
+  color: #16a34a;
+  background: rgba(74, 222, 128, 0.16);
 }
 
 .selo-baixa {
-  color: #f87171;
-  background: rgba(248, 113, 113, 0.14);
+  color: #dc2626;
+  background: rgba(248, 113, 113, 0.16);
 }
 
 .selo-novo {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.16);
+  color: #0284c7;
+  background: rgba(56, 189, 248, 0.18);
 }
 
 /* Na legenda da pizza, empurra o selo para a ponta direita da linha */
@@ -651,7 +736,7 @@ body {
 }
 
 .linha-grafico.destaque-busca .nome-texto {
-  color: #d8dbe0;
+  color: var(--texto-hover);
 }
 
 .fatia-pizza.destaque-busca {
@@ -660,7 +745,7 @@ body {
 
 .destaque-busca-legenda {
   font-weight: 700;
-  color: #f5f5f5;
+  color: var(--texto);
 }
 
 /* Aviso de quem caiu do Top 10 desde a última atualização — escondido por padrão,
@@ -672,18 +757,25 @@ body {
   margin: 0 auto;
   text-align: center;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--texto-muted-forte);
 }
 
-/* Botão de baixar o gráfico atual como imagem PNG */
+/* Agrupa os botões de baixar imagem e copiar link, lado a lado */
+.botoes-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+/* Botão de baixar o gráfico como imagem PNG / copiar o link da visualização atual */
 .botao-baixar {
   appearance: none;
   -webkit-appearance: none;
-  display: block;
-  margin: 4px auto 0;
   background: transparent;
-  color: #9ca3af;
-  border: 1px solid #232631;
+  color: var(--texto-muted);
+  border: 1px solid var(--borda);
   border-radius: 999px;
   padding: 8px 18px;
   font-family: inherit;
@@ -694,17 +786,17 @@ body {
 }
 
 .botao-baixar:hover {
-  color: #e9e9ee;
-  border-color: #3a3f4d;
+  color: var(--texto);
+  border-color: var(--borda-forte);
 }
 
 /* RODAPÉ: fica sempre na base da tela (o flex-column do body + o flex:1 do .conteudo cuidam disso),
    mesmo em páginas com pouco conteúdo. Espaço reservado para créditos, contato, links etc. */
 .rodape {
-  border-top: 1px solid #1c1f27; /* Linha sutil separando o footer do conteúdo */
+  border-top: 1px solid var(--borda-fraca);
   padding: 18px 32px;
   text-align: center;
-  color: #6b7280; /* Cinza apagado, por ser uma informação secundária */
+  color: var(--texto-muted-forte);
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;

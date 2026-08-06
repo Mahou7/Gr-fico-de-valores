@@ -84,6 +84,9 @@ const notaSaidas = document.getElementById("notaSaidas");
 const inputBusca = document.getElementById("buscaJogador");
 const btnBaixarImagem = document.getElementById("btnBaixarImagem");
 const tituloGrafico = document.getElementById("tituloGrafico");
+const resumoComparativoEl = document.getElementById("resumoComparativo");
+const btnTema = document.getElementById("btnTema");
+const btnCopiarLink = document.getElementById("btnCopiarLink");
 
 // Guarda em qual modo ("lado", "ranking" ou "evolucao"), em qual snapshot (data) e em
 // qual tipo de gráfico ("colunas" ou "pizza") a tela está agora
@@ -173,6 +176,14 @@ function atualizarNotaSaidas() {
 }
 
 
+// Retorna o emoji de medalha para as 3 primeiras posições, ou string vazia para o resto
+function obterMedalha(posicao) {
+  if (posicao === 1) return "🥇 ";
+  if (posicao === 2) return "🥈 ";
+  if (posicao === 3) return "🥉 ";
+  return "";
+}
+
 // Descobre qual é o maior valor dentro do snapshot recebido.
 // Isso é usado para calcular a altura das barras em proporção (regra de três),
 // assim a barra maior sempre ocupa 100% do espaço disponível.
@@ -183,8 +194,9 @@ function obterMaiorValor(regiaoA, regiaoB) {
 
 // Cria o elemento HTML de uma única linha do gráfico (nome + barra + valor).
 // "regiaoAnterior" é a lista da mesma região no snapshot anterior (ou undefined),
-// usada só para calcular o selo de variação — ver calcularVariacao()
-function criarLinha(pessoa, corClasse, maiorValor, regiaoAnterior) {
+// usada só para calcular o selo de variação — ver calcularVariacao().
+// "posicao" (1, 2, 3...) é usada só para mostrar a medalha nos 3 primeiros
+function criarLinha(pessoa, corClasse, maiorValor, regiaoAnterior, posicao) {
   const linha = document.createElement("div");
   linha.className = "linha-grafico";
 
@@ -195,7 +207,7 @@ function criarLinha(pessoa, corClasse, maiorValor, regiaoAnterior) {
 
   const nomeTexto = document.createElement("span");
   nomeTexto.className = "nome-texto";
-  nomeTexto.textContent = pessoa.nome;
+  nomeTexto.textContent = `${obterMedalha(posicao)}${pessoa.nome}`;
   nome.appendChild(nomeTexto);
 
   // Selo de variação (▲/▼/NOVO) em relação à atualização anterior, embaixo do nome
@@ -246,8 +258,8 @@ function desenharLadoALado() {
   const maiorValor = obterMaiorValor(regiaoA, regiaoB);
 
   for (let i = 0; i < 10; i++) {
-    containerGrafico.appendChild(criarLinha(regiaoA[i], "regiaoA", maiorValor, anterior?.regiaoA));
-    containerGrafico.appendChild(criarLinha(regiaoB[i], "regiaoB", maiorValor, anterior?.regiaoB));
+    containerGrafico.appendChild(criarLinha(regiaoA[i], "regiaoA", maiorValor, anterior?.regiaoA, i + 1));
+    containerGrafico.appendChild(criarLinha(regiaoB[i], "regiaoB", maiorValor, anterior?.regiaoB, i + 1));
   }
 }
 
@@ -269,10 +281,10 @@ function desenharRankingGeral() {
   // Ordena a lista combinada do maior valor para o menor
   todosComRegiao.sort((a, b) => b.valor - a.valor);
 
-  todosComRegiao.forEach((pessoa) => {
+  todosComRegiao.forEach((pessoa, indice) => {
     // Cada pessoa precisa ser comparada com a lista da PRÓPRIA região no snapshot anterior
     const regiaoAnteriorMesma = pessoa.regiao === "regiaoA" ? anterior?.regiaoA : anterior?.regiaoB;
-    containerGrafico.appendChild(criarLinha(pessoa, pessoa.regiao, maiorValor, regiaoAnteriorMesma));
+    containerGrafico.appendChild(criarLinha(pessoa, pessoa.regiao, maiorValor, regiaoAnteriorMesma, indice + 1));
   });
 }
 
@@ -365,7 +377,7 @@ function criarPizzaSvg(pessoas, cores, tamanho) {
     // dessa fatia específica. O "pulsar" e o "crescer/encolher" ficam por conta do CSS
     // (a animação de :hover em .fatia-pizza), aqui só cuidamos do texto
     fatia.addEventListener("mouseenter", () => {
-      rotuloNome.textContent = pessoa.nome;
+      rotuloNome.textContent = `${obterMedalha(i + 1)}${pessoa.nome}`;
       rotuloPorcentagem.textContent = `${porcentagem.toFixed(1).replace(".", ",")}%`;
       rotuloGrupo.classList.add("visivel");
     });
@@ -401,7 +413,7 @@ function criarPizzaLegenda(pessoas, cores, resolverAnterior) {
 
     const texto = document.createElement("span");
     const porcentagem = ((pessoa.valor / total) * 100).toFixed(1).replace(".", ",");
-    texto.textContent = `${pessoa.nome} — ${porcentagem}%`;
+    texto.textContent = `${obterMedalha(i + 1)}${pessoa.nome} — ${porcentagem}%`;
 
     item.appendChild(swatch);
     item.appendChild(texto);
@@ -669,6 +681,29 @@ function aplicarBusca() {
 }
 
 // ===================================================================
+// RESUMO COMPARATIVO
+// Frase dinâmica no cabeçalho comparando o total das duas regiões no snapshot
+// atualmente selecionado — atualiza toda vez que o snapshot muda
+// ===================================================================
+function atualizarResumoComparativo() {
+  const { regiaoA, regiaoB } = snapshots[indiceSnapshotAtual];
+  const totalA = regiaoA.reduce((soma, pessoa) => soma + pessoa.valor, 0);
+  const totalB = regiaoB.reduce((soma, pessoa) => soma + pessoa.valor, 0);
+
+  const kantoNaFrente = totalA >= totalB;
+  const maiorNome = kantoNaFrente ? "Kanto" : "Johto";
+  const menorNome = kantoNaFrente ? "Johto" : "Kanto";
+  const maiorTotal = Math.max(totalA, totalB);
+  const menorTotal = Math.min(totalA, totalB);
+
+  const percentual = ((maiorTotal - menorTotal) / menorTotal) * 100;
+  const percentualFormatado = percentual.toFixed(1).replace(".", ",");
+
+  resumoComparativoEl.textContent = `${maiorNome} está ${percentualFormatado}% à frente de ${menorNome} neste snapshot (somando o Top 10 de cada região).`;
+}
+
+
+// ===================================================================
 // PRÓXIMA ATUALIZAÇÃO
 // Calcula 7 dias após a data mais recente do histórico, e compara com a data de
 // hoje no computador de quem está vendo a página (não com a data do histórico)
@@ -704,6 +739,110 @@ function exibirProximaAtualizacao() {
 }
 
 
+// ===================================================================
+// TEMA CLARO/ESCURO
+// Troca o atributo data-tema na tag <html>, que é o que as variáveis de cor no
+// CSS (:root e html[data-tema="claro"]) usam para decidir a paleta inteira.
+// A escolha fica salva no localStorage, então continua a mesma na próxima visita
+// ===================================================================
+function aplicarTema(tema) {
+  document.documentElement.setAttribute("data-tema", tema);
+  btnTema.textContent = tema === "claro" ? "☀️" : "🌙";
+  localStorage.setItem("baltop-tema", tema);
+}
+
+btnTema.addEventListener("click", () => {
+  const temaAtual = document.documentElement.getAttribute("data-tema");
+  aplicarTema(temaAtual === "claro" ? "escuro" : "claro");
+});
+
+// ===================================================================
+// URL COMPARTILHÁVEL
+// Guarda modo, data e tipo de gráfico na URL, e lê de volta ao carregar a página —
+// assim um link copiado (ver btnCopiarLink) abre exatamente na mesma visualização
+// ===================================================================
+function atualizarURL() {
+  const parametros = new URLSearchParams();
+  parametros.set("modo", modoAtual);
+  parametros.set("data", indiceSnapshotAtual);
+  parametros.set("tipo", tipoGrafico);
+
+  const novaURL = `${window.location.pathname}?${parametros.toString()}`;
+  // replaceState (em vez de pushState) não cria uma entrada nova no histórico do
+  // navegador a cada clique — senão o botão "voltar" ficaria inutilizável
+  window.history.replaceState(null, "", novaURL);
+}
+
+// Lê o modo/data/tipo salvos na URL (se houver) e aplica ANTES do primeiro desenho.
+// Chamado uma única vez, no carregamento da página
+function restaurarEstadoDaURL() {
+  const parametros = new URLSearchParams(window.location.search);
+  const modoURL = parametros.get("modo");
+  const dataURL = parametros.get("data");
+  const tipoURL = parametros.get("tipo");
+
+  if (["lado", "ranking", "evolucao"].includes(modoURL)) {
+    modoAtual = modoURL;
+  }
+  if (dataURL !== null && snapshots[Number(dataURL)]) {
+    indiceSnapshotAtual = Number(dataURL);
+  }
+  if (["colunas", "pizza"].includes(tipoURL)) {
+    tipoGrafico = tipoURL;
+  }
+
+  // Sincroniza os botões e o seletor visualmente com o estado que acabou de ser lido
+  seletorData.value = indiceSnapshotAtual;
+  marcarBotaoAtivo(modoAtual === "lado" ? btnLado : modoAtual === "ranking" ? btnRanking : btnEvolucao);
+  marcarBotaoTipoAtivo(tipoGrafico === "pizza" ? btnPizza : btnColunas);
+}
+
+btnCopiarLink.addEventListener("click", () => {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    // Feedback rápido no próprio botão, sem precisar de um alerta separado
+    const textoOriginal = btnCopiarLink.textContent;
+    btnCopiarLink.textContent = "Link copiado!";
+    window.setTimeout(() => {
+      btnCopiarLink.textContent = textoOriginal;
+    }, 1500);
+  });
+});
+
+// ===================================================================
+// ATALHOS DE TECLADO
+// ← → trocam a data selecionada; 1, 2, 3 trocam entre Lado a lado / Ranking / Evolução.
+// Fica desligado enquanto o usuário está digitando em algum campo (busca, seletor)
+// ===================================================================
+document.addEventListener("keydown", (evento) => {
+  const elementoAtivo = document.activeElement;
+  const estaDigitando =
+    elementoAtivo &&
+    (elementoAtivo.tagName === "INPUT" || elementoAtivo.tagName === "SELECT" || elementoAtivo.tagName === "TEXTAREA");
+  if (estaDigitando) return; // Não rouba as setas/números de quem está digitando
+
+  if (evento.key === "ArrowLeft" && indiceSnapshotAtual > 0) {
+    indiceSnapshotAtual -= 1;
+    seletorData.value = indiceSnapshotAtual;
+    redesenharGraficoAtual();
+  } else if (evento.key === "ArrowRight" && indiceSnapshotAtual < snapshots.length - 1) {
+    indiceSnapshotAtual += 1;
+    seletorData.value = indiceSnapshotAtual;
+    redesenharGraficoAtual();
+  } else if (evento.key === "1") {
+    modoAtual = "lado";
+    marcarBotaoAtivo(btnLado);
+    redesenharGraficoAtual();
+  } else if (evento.key === "2") {
+    modoAtual = "ranking";
+    marcarBotaoAtivo(btnRanking);
+    redesenharGraficoAtual();
+  } else if (evento.key === "3") {
+    modoAtual = "evolucao";
+    marcarBotaoAtivo(btnEvolucao);
+    redesenharGraficoAtual();
+  }
+});
+
 // Olha o modoAtual e o tipoGrafico e chama a função de desenho correspondente.
 // É essa função que os botões, o seletor de data E o controle Colunas/Pizza usam
 // para redesenhar a tela
@@ -714,6 +853,13 @@ function redesenharGraficoAtual() {
   // Só o modo "Ranking geral" ganha um título — é o único gráfico que junta as
   // duas regiões numa lista só, então vale deixar isso explícito (20 pessoas no total)
   tituloGrafico.textContent = modoAtual === "ranking" ? "Top 20 — Ranking Geral" : "";
+
+  // A frase comparativa depende só da data selecionada, não do modo/tipo de gráfico
+  atualizarResumoComparativo();
+
+  // Guarda o estado atual (modo, data, tipo) na URL, pra dar pra compartilhar um link
+  // direto que já abre nessa mesma visualização (ver atualizarURL e btnCopiarLink)
+  atualizarURL();
 
   // No modo evolução o gráfico já mostra TODAS as datas de uma vez, então o seletor
   // de data individual não se aplica — ele fica desabilitado (mas continua visível)
@@ -832,7 +978,10 @@ btnBaixarImagem.addEventListener("click", () => {
     return;
   }
 
-  html2canvas(containerGrafico, { backgroundColor: "#0f1115", scale: 2 }).then((canvas) => {
+  // Pega a cor de fundo do tema ATUAL (claro ou escuro), pra imagem sair coerente
+  const corDeFundoAtual = getComputedStyle(document.documentElement).getPropertyValue("--fundo").trim();
+
+  html2canvas(containerGrafico, { backgroundColor: corDeFundoAtual, scale: 2 }).then((canvas) => {
     const link = document.createElement("a");
     const dataDoSnapshot = snapshots[indiceSnapshotAtual].data.replaceAll("/", "-");
     link.download = `baltop-${modoAtual}-${dataDoSnapshot}.png`;
@@ -840,6 +989,13 @@ btnBaixarImagem.addEventListener("click", () => {
     link.click();
   });
 });
+
+// Aplica o tema salvo de uma visita anterior (ou "escuro" como padrão)
+aplicarTema(localStorage.getItem("baltop-tema") || "escuro");
+
+// Lê o modo/data/tipo da URL (se alguém abriu um link compartilhado) ANTES do
+// primeiro desenho, pra já carregar direto na visualização certa
+restaurarEstadoDaURL();
 
 // Desenha o gráfico pela primeira vez assim que a página carrega
 redesenharGraficoAtual();

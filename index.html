@@ -14,6 +14,8 @@
     <div class="cabecalho-textos">
       <h1>Top 10 mais ricos: <span class="destaque destaque-kanto">Kanto</span> vs <span class="destaque destaque-johto">Johto</span></h1>
       <p class="subtitulo">Comparativo entre as duas regiões, posição por posição</p>
+      <!-- Preenchido pelo JavaScript: compara o total das duas regiões no snapshot atual -->
+      <p class="resumo-comparativo" id="resumoComparativo"></p>
       <div class="atualizado">
         <label for="seletorData">Dados de:</label>
         <!-- As opções desse seletor são preenchidas dinamicamente pelo script.js,
@@ -24,11 +26,16 @@
       <p class="proxima-atualizacao" id="proximaAtualizacao"></p>
     </div>
 
-    <!-- Botões para trocar como o gráfico é exibido -->
-    <div class="controles controles-principal">
-      <button id="btnLado" class="botao ativo">Lado a lado</button>
-      <button id="btnRanking" class="botao">Ranking geral</button>
-      <button id="btnEvolucao" class="botao">Evolução</button>
+    <div class="cabecalho-controles">
+      <!-- Botões para trocar como o gráfico é exibido -->
+      <div class="controles controles-principal">
+        <button id="btnLado" class="botao ativo">Lado a lado</button>
+        <button id="btnRanking" class="botao">Ranking geral</button>
+        <button id="btnEvolucao" class="botao">Evolução</button>
+      </div>
+
+      <!-- Alterna entre tema escuro e claro, e lembra a escolha (localStorage) -->
+      <button id="btnTema" class="botao-tema" aria-label="Alternar tema claro/escuro" title="Alternar tema">🌙</button>
     </div>
   </header>
 
@@ -68,7 +75,11 @@
     <!-- Preenchido pelo JavaScript só quando alguém saiu do Top 10 desde a atualização anterior -->
     <p class="nota-saidas" id="notaSaidas"></p>
 
-    <button id="btnBaixarImagem" class="botao-baixar">Baixar gráfico como imagem</button>
+    <div class="botoes-acoes">
+      <button id="btnBaixarImagem" class="botao-baixar">Baixar gráfico como imagem</button>
+      <!-- Copia a URL atual, que já guarda o modo/data/tipo de gráfico selecionados (ver script.js) -->
+      <button id="btnCopiarLink" class="botao-baixar">Copiar link desta visualização</button>
+    </div>
   </main>
 
   <!-- RODAPÉ: espaço reservado para créditos/contato. Troque pelos seus dados reais -->
