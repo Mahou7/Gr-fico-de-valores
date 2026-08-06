@@ -67,13 +67,14 @@ const snapshots = [
 // Pega a referência do elemento HTML onde o gráfico será desenhado
 const containerGrafico = document.getElementById("grafico");
 
-// Pega a referência dos dois botões de alternância de modo, e do seletor de data
+// Pega a referência dos três botões de alternância de modo, e do seletor de data
 const btnLado = document.getElementById("btnLado");
 const btnRanking = document.getElementById("btnRanking");
+const btnEvolucao = document.getElementById("btnEvolucao");
 const seletorData = document.getElementById("seletorData");
 
-// Guarda em qual modo (lado a lado / ranking) e em qual snapshot (data) o gráfico
-// está agora. São essas duas variáveis que decidem o que desenhar na tela
+// Guarda em qual modo ("lado", "ranking" ou "evolucao") e em qual snapshot (data) o
+// gráfico está agora. São essas duas variáveis que decidem o que desenhar na tela
 let modoAtual = "lado";
 let indiceSnapshotAtual = snapshots.length - 1; // Começa sempre no snapshot mais recente
 
@@ -168,20 +169,169 @@ function desenharRankingGeral() {
   });
 }
 
+// Modo 3: gráfico de linhas mostrando a evolução do total de cada região ao longo
+// de todas as datas salvas no histórico (o array "snapshots"). Diferente dos outros
+// dois modos, este usa TODOS os snapshots de uma vez, não só o selecionado no dropdown
+function desenharEvolucao() {
+  containerGrafico.innerHTML = "";
+
+  // Para cada snapshot, soma o valor dos 10 jogadores de cada região.
+  // Isso dá um único número por região por data, que é o que o gráfico de linha plota
+  const pontos = snapshots.map((snapshot) => ({
+    data: snapshot.data,
+    totalA: snapshot.regiaoA.reduce((soma, pessoa) => soma + pessoa.valor, 0),
+    totalB: snapshot.regiaoB.reduce((soma, pessoa) => soma + pessoa.valor, 0),
+  }));
+
+  // ===================================================================
+  // DADOS FICTÍCIOS — só para você visualizar como o gráfico fica com mais pontos.
+  // Eles NÃO entram no array "snapshots" lá em cima, então não aparecem no seletor
+  // de data nem nos modos "Lado a lado"/"Ranking geral" — só aqui na Evolução.
+  // Apague estas duas linhas de "pontos.push" quando não precisar mais delas.
+  // ===================================================================
+  pontos.push(
+    { data: "13/08/2026 (fictício)", totalA: 5300000000, totalB: 2100000000 },
+    { data: "20/08/2026 (fictício)", totalA: 5550000000, totalB: 1950000000 }
+  );
+
+  const maiorTotal = Math.max(...pontos.map((p) => Math.max(p.totalA, p.totalB)));
+
+  // Medidas do "papel" onde o SVG desenha (não são pixels reais da tela — é um sistema
+  // de coordenadas próprio que o navegador estica/encolhe sozinho para caber em qualquer tela).
+  // A margem esquerda é bem maior que as outras de propósito: é o espaço que os números
+  // das linhas de referência (ex: "2.600 KK") precisam para não serem cortados
+  const largura = 1000;
+  const altura = 420;
+  const margem = { topo: 30, baixo: 50, esquerda: 130, direita: 70 };
+  const areaLargura = largura - margem.esquerda - margem.direita;
+  const areaAltura = altura - margem.topo - margem.baixo;
+
+  // Converte a posição de um snapshot na linha do tempo (0, 1, 2...) numa coordenada X
+  function calcularX(indice) {
+    if (pontos.length === 1) return margem.esquerda + areaLargura / 2;
+    return margem.esquerda + (indice / (pontos.length - 1)) * areaLargura;
+  }
+
+  // Converte um valor numa coordenada Y — quanto maior o valor, mais para cima no desenho
+  function calcularY(valor) {
+    return margem.topo + (1 - valor / maiorTotal) * areaAltura;
+  }
+
+  // Monta a string "x,y x,y x,y..." que o atributo "points" da <polyline> espera
+  function montarPontos(chave) {
+    return pontos.map((p, i) => `${calcularX(i)},${calcularY(p[chave])}`).join(" ");
+  }
+
+  // Elementos de SVG não podem ser criados com document.createElement comum — eles
+  // pertencem a um "namespace" diferente do HTML, por isso o createElementNS abaixo
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${largura} ${altura}`);
+  svg.setAttribute("class", "grafico-linha");
+
+  // Linhas horizontais de referência (25%, 50%, 75%, 100% do maior valor), cada uma
+  // com o valor escrito do lado esquerdo — é isso que dá a "escala" do gráfico
+  [0.25, 0.5, 0.75, 1].forEach((fracao) => {
+    const valorLinha = maiorTotal * fracao;
+    const y = calcularY(valorLinha);
+
+    const linhaGuia = document.createElementNS(svgNS, "line");
+    linhaGuia.setAttribute("x1", margem.esquerda);
+    linhaGuia.setAttribute("x2", largura - margem.direita);
+    linhaGuia.setAttribute("y1", y);
+    linhaGuia.setAttribute("y2", y);
+    linhaGuia.setAttribute("class", "linha-guia");
+    svg.appendChild(linhaGuia);
+
+    // O valor da linha, formatado em KK, escrito à esquerda dela
+    const rotuloValor = document.createElementNS(svgNS, "text");
+    rotuloValor.setAttribute("x", margem.esquerda - 10);
+    rotuloValor.setAttribute("y", y - 6);
+    rotuloValor.setAttribute("class", "rotulo-valor");
+    const valorFormatado = (valorLinha / 1_000_000).toLocaleString("pt-BR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+    rotuloValor.textContent = `${valorFormatado} KK`;
+    svg.appendChild(rotuloValor);
+  });
+
+  // Desenha a linha de evolução de cada região (uma <polyline> por cor)
+  ["totalA", "totalB"].forEach((chave) => {
+    const cor = chave === "totalA" ? "regiaoA" : "regiaoB";
+    const linha = document.createElementNS(svgNS, "polyline");
+    linha.setAttribute("points", montarPontos(chave));
+    linha.setAttribute("class", `linha-evolucao ${cor}`);
+    svg.appendChild(linha);
+  });
+
+  // Desenha os pontos (círculos) em cima da linha e os rótulos de data embaixo
+  pontos.forEach((ponto, i) => {
+    const x = calcularX(i);
+
+    // Linha vertical tracejada marcando essa data — vai do eixo X até o topo do gráfico,
+    // destacando visualmente cada atualização registrada no histórico
+    const linhaData = document.createElementNS(svgNS, "line");
+    linhaData.setAttribute("x1", x);
+    linhaData.setAttribute("x2", x);
+    linhaData.setAttribute("y1", margem.topo);
+    linhaData.setAttribute("y2", altura - margem.baixo);
+    linhaData.setAttribute("class", "linha-data");
+    svg.appendChild(linhaData);
+
+    ["totalA", "totalB"].forEach((chave) => {
+      const cor = chave === "totalA" ? "regiaoA" : "regiaoB";
+      const y = calcularY(ponto[chave]);
+
+      const circulo = document.createElementNS(svgNS, "circle");
+      circulo.setAttribute("cx", x);
+      circulo.setAttribute("cy", y);
+      circulo.setAttribute("class", `ponto-evolucao ${cor}`);
+
+      // O <title> dentro de um elemento SVG faz o navegador mostrar uma dica (tooltip)
+      // nativa ao passar o mouse em cima — sem precisar de nenhum código extra para isso
+      const dica = document.createElementNS(svgNS, "title");
+      const valorEmMilhoes = (ponto[chave] / 1_000_000).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      dica.textContent = `${ponto.data}: ${valorEmMilhoes} KK`;
+      circulo.appendChild(dica);
+
+      svg.appendChild(circulo);
+    });
+
+    // Rótulo com a data, alinhado embaixo do eixo X nessa posição
+    const rotulo = document.createElementNS(svgNS, "text");
+    rotulo.setAttribute("x", x);
+    rotulo.setAttribute("y", altura - 15);
+    rotulo.setAttribute("class", "rotulo-eixo");
+    rotulo.textContent = ponto.data;
+    svg.appendChild(rotulo);
+  });
+
+  containerGrafico.appendChild(svg);
+}
+
 // Olha o modoAtual e chama a função de desenho correspondente.
 // É essa função que tanto os botões quanto o seletor de data usam para redesenhar a tela
 function redesenharGraficoAtual() {
   if (modoAtual === "lado") {
     desenharLadoALado();
-  } else {
+  } else if (modoAtual === "ranking") {
     desenharRankingGeral();
+  } else {
+    desenharEvolucao();
   }
+
+  // No modo evolução o gráfico já mostra TODAS as datas de uma vez, então o seletor
+  // de data individual não se aplica — ele fica desabilitado (mas continua visível)
+  seletorData.disabled = modoAtual === "evolucao";
 }
 
-// Alterna a classe "ativo" entre os botões, para indicar visualmente qual modo está selecionado
+// Alterna a classe "ativo" entre os três botões, para indicar visualmente qual modo está selecionado
 function marcarBotaoAtivo(botaoSelecionado) {
-  btnLado.classList.remove("ativo");
-  btnRanking.classList.remove("ativo");
+  document.querySelectorAll(".controles .botao").forEach((botao) => botao.classList.remove("ativo"));
   botaoSelecionado.classList.add("ativo");
 }
 
@@ -196,6 +346,13 @@ btnLado.addEventListener("click", () => {
 btnRanking.addEventListener("click", () => {
   modoAtual = "ranking";
   marcarBotaoAtivo(btnRanking);
+  redesenharGraficoAtual();
+});
+
+// Quando o botão "Evolução" é clicado, muda o modo e redesenha
+btnEvolucao.addEventListener("click", () => {
+  modoAtual = "evolucao";
+  marcarBotaoAtivo(btnEvolucao);
   redesenharGraficoAtual();
 });
 

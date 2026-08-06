@@ -82,6 +82,13 @@ body {
   outline-offset: 1px;
 }
 
+/* No modo "Evolução" o seletor de data é desabilitado (ver script.js) — aqui ele
+   fica visualmente apagado, para deixar claro que não está disponível nesse modo */
+.atualizado select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Um único bloco arredondado (o "botão"), sem espaço entre as duas metades — daí o
    overflow: hidden, que corta os cantos internos dos botões e deixa só os da pílula externa */
 .controles {
@@ -233,6 +240,95 @@ body {
 /* Cor usada para todas as barras de Johto — remete ao dourado de Pokémon Gold */
 .regiaoB {
   background-color: #d4a017;
+}
+
+/* GRÁFICO DE LINHAS (modo "Evolução") */
+
+.grafico-linha {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  animation: aparecer-grafico-linha 0.5s ease; /* Uma leve entrada suave ao trocar de modo */
+}
+
+@keyframes aparecer-grafico-linha {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Linhas horizontais de referência no fundo do gráfico (valores) */
+.linha-guia {
+  stroke: #232631;
+  stroke-width: 1;
+}
+
+/* O número escrito ao lado de cada linha horizontal, mostrando a que valor ela corresponde */
+.rotulo-valor {
+  fill: #6b7280;
+  font-family: inherit;
+  font-size: 17px;
+  text-anchor: end; /* O texto termina exatamente onde a linha começa, ficando bem alinhado */
+}
+
+/* Linha vertical tracejada marcando cada data — o "destaque" pedido para as atualizações.
+   Tracejada (dashed) e mais discreta que a linha de valor, para não competir com as
+   linhas de evolução (que são o elemento principal do gráfico) */
+.linha-data {
+  stroke: #2c2f38;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+/* As duas linhas de evolução (uma por região). "fill: none" é essencial — sem isso,
+   o navegador tentaria preencher a área fechada pela linha, como se fosse um polígono */
+.linha-evolucao {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.linha-evolucao.regiaoA {
+  stroke: #dc2626;
+}
+
+.linha-evolucao.regiaoB {
+  stroke: #d4a017;
+}
+
+/* Os pontos (círculos) em cima de cada linha, um por data registrada.
+   "r" (raio) é definido aqui via CSS em vez de no JavaScript, só para poder animá-lo
+   suavemente no hover, dando um destaque sutil ao passar o mouse */
+.ponto-evolucao {
+  r: 5;
+  stroke: #0f1115;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: r 0.2s ease;
+}
+
+.ponto-evolucao:hover {
+  r: 8;
+}
+
+.ponto-evolucao.regiaoA {
+  fill: #dc2626;
+}
+
+.ponto-evolucao.regiaoB {
+  fill: #d4a017;
+}
+
+/* Rótulos de data no eixo X, embaixo do gráfico */
+.rotulo-eixo {
+  fill: #9ca3af;
+  font-family: inherit;
+  font-size: 20px;
+  text-anchor: middle; /* Centraliza o texto exatamente sobre a coordenada X do ponto */
 }
 
 /* Legenda no rodapé mostrando o que cada cor representa */
