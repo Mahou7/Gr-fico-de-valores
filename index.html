@@ -20,10 +20,12 @@
              uma para cada snapshot salvo (ver o array "snapshots" no topo do arquivo) -->
         <select id="seletorData"></select>
       </div>
+      <!-- Preenchido pelo JavaScript: calcula 7 dias após a data mais recente do histórico -->
+      <p class="proxima-atualizacao" id="proximaAtualizacao"></p>
     </div>
 
     <!-- Botões para trocar como o gráfico é exibido -->
-    <div class="controles">
+    <div class="controles controles-principal">
       <button id="btnLado" class="botao ativo">Lado a lado</button>
       <button id="btnRanking" class="botao">Ranking geral</button>
       <button id="btnEvolucao" class="botao">Evolução</button>
@@ -33,7 +35,24 @@
   <!-- CONTEÚDO PRINCIPAL: ocupa todo o espaço vertical sobrando entre header e footer,
        e centraliza o gráfico nesse espaço (é isso que resolve o "vazio" que sobrava embaixo) -->
   <main class="conteudo">
-    <!-- Esse <div> vazio vai ser preenchido dinamicamente pelo JavaScript com as colunas do gráfico -->
+    <!-- Controle secundário (Colunas/Pizza) e a busca de jogador, lado a lado -->
+    <div class="linha-controles-secundarios">
+      <!-- Só faz sentido nos modos "Lado a lado" e "Ranking geral" — o JavaScript
+           esconde ele no modo "Evolução" -->
+      <div class="controles controles-tipo" id="controlesTipo">
+        <button id="btnColunas" class="botao ativo">Colunas</button>
+        <button id="btnPizza" class="botao">Pizza</button>
+      </div>
+
+      <!-- Destaca (com o mesmo efeito de pulso do hover) a coluna/fatia de quem for digitado -->
+      <input type="text" id="buscaJogador" class="busca-jogador" placeholder="Buscar jogador..." />
+    </div>
+
+    <!-- Preenchido pelo JavaScript — só aparece no modo "Ranking geral", deixando claro
+         que ali são as 20 pessoas juntas (top 10 de Kanto + top 10 de Johto) -->
+    <h2 class="titulo-grafico" id="tituloGrafico"></h2>
+
+    <!-- Esse <div> vazio vai ser preenchido dinamicamente pelo JavaScript com o gráfico -->
     <div id="grafico" class="grafico"></div>
 
     <!-- Legenda explicando as cores usadas no gráfico -->
@@ -45,6 +64,11 @@
         <span class="cor-legenda regiaoB"></span> Johto
       </div>
     </div>
+
+    <!-- Preenchido pelo JavaScript só quando alguém saiu do Top 10 desde a atualização anterior -->
+    <p class="nota-saidas" id="notaSaidas"></p>
+
+    <button id="btnBaixarImagem" class="botao-baixar">Baixar gráfico como imagem</button>
   </main>
 
   <!-- RODAPÉ: espaço reservado para créditos/contato. Troque pelos seus dados reais -->
@@ -53,6 +77,10 @@
     <p class="rodape-contato">Nathã Cazelato · Cazelato@exemplo.com · <a href="#">GitHub</a></p>
   </footer>
 
+  <!-- Biblioteca externa usada só pelo botão "Baixar gráfico como imagem" — converte
+       o HTML do gráfico numa imagem. Precisa de internet pra carregar; se a página
+       for aberta offline, esse botão simplesmente não funciona (ver script.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="script.js"></script> <!-- Conecta o arquivo JavaScript, que contém a lógica do gráfico -->
 </body>
 </html>
