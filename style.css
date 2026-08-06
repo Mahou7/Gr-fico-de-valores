@@ -1,0 +1,314 @@
+/* Reset básico: remove margens e espaçamentos padrão que o navegador aplica sozinho */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Faz com que padding e borda não aumentem o tamanho total do elemento */
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif; /* Fonte usada em todo o site */
+  background-color: #0f1115; /* Fundo escuro, fica confortável para gráficos coloridos */
+  color: #e9e9ee; /* Cor do texto, clara para contrastar com o fundo escuro */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* Empilha header, conteúdo e footer, nessa ordem */
+}
+
+/* CABEÇALHO: título de um lado, botões do outro, distribuídos dinamicamente.
+   Se não couberem lado a lado (tela estreita), o flex-wrap deixa o botão descer sozinho */
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 32px;
+  border-bottom: 1px solid #1c1f27; /* Linha sutil separando o cabeçalho do resto */
+}
+
+.cabecalho-textos {
+  text-align: left;
+}
+
+.cabecalho h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* Estiliza as palavras "Kanto" e "Johto" dentro do título, cada uma na cor da sua região */
+.destaque-kanto {
+  color: #ef4444;
+}
+
+.destaque-johto {
+  color: #d4a017;
+}
+
+.subtitulo {
+  color: #9ca3af; /* Cinza claro, texto secundário */
+  font-size: 0.95rem;
+}
+
+/* Linha discreta com o seletor de data (o "backup" de snapshots antigos) */
+.atualizado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.atualizado select {
+  appearance: none; /* Remove o visual nativo do navegador, mesmo motivo do .botao */
+  -webkit-appearance: none;
+  background: #14161c;
+  color: #9ca3af;
+  border: 1px solid #232631;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.atualizado select:hover {
+  border-color: #3a3f4d;
+}
+
+.atualizado select:focus-visible {
+  outline: 2px solid #ee1515;
+  outline-offset: 1px;
+}
+
+/* Um único bloco arredondado (o "botão"), sem espaço entre as duas metades — daí o
+   overflow: hidden, que corta os cantos internos dos botões e deixa só os da pílula externa */
+.controles {
+  display: flex;
+  background: #1c1f27;
+  border: 1px solid #2c2f38;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.botao {
+  appearance: none; /* Remove o visual nativo que o navegador/sistema aplicaria (a "caixa branca") */
+  -webkit-appearance: none; /* Mesma coisa, mas para navegadores baseados em WebKit (Safari) */
+  background: transparent;
+  color: #9ca3af; /* Lado não selecionado fica apagado, simbolizando que está desativado */
+  border: none;
+  padding: 9px 22px;
+  cursor: pointer;
+  font-family: inherit; /* Sem isso, alguns navegadores usam a fonte padrão do sistema no botão */
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+}
+
+/* Ao passar o mouse no lado desativado: ele clareia, sinalizando que é clicável */
+.botao:hover {
+  color: #e9e9ee;
+}
+
+/* Ao clicar: um leve encolhimento, dá a sensação tátil de "pressionar" */
+.botao:active {
+  transform: scale(0.95);
+}
+
+/* Contorno visível ao navegar pelo teclado (Tab), importante para acessibilidade.
+   Fica para dentro (offset negativo) para não vazar pra fora do bloco único */
+.botao:focus-visible {
+  outline: 2px solid #ee1515;
+  outline-offset: -3px;
+}
+
+/* Classe aplicada via JavaScript no lado selecionado no momento: ganha fundo cheio
+   e vira a parte "destacada" do botão único. Vermelho da Pokébola: uma cor neutra em
+   relação a Kanto/Johto, já que não é nem o vermelho do Kanto nem o dourado do Johto */
+.botao.ativo {
+  background: #ee1515;
+  color: #f5f5f5;
+}
+
+.botao.ativo:hover {
+  color: #f5f5f5; /* Já está destacado, então o hover não precisa clarear mais o texto */
+}
+
+/* CONTEÚDO PRINCIPAL: cresce para ocupar o espaço vertical entre header e footer (flex: 1),
+   e centraliza o gráfico dentro desse espaço — é isso que resolve o vazio que sobrava embaixo */
+.conteudo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Centraliza verticalmente no espaço disponível */
+  gap: 32px;
+  width: 100%;
+  padding: 32px 16px;
+}
+
+/* Container principal onde as colunas do gráfico ficam */
+.grafico {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end; /* Alinha todas as colunas pela base, como um gráfico de barras de verdade */
+  justify-content: space-between; /* Espalha as colunas usando toda a largura disponível da tela */
+  gap: clamp(10px, 2.5vw, 18px); /* O espaço entre colunas encolhe em telas menores */
+  padding: 24px 8px 8px; /* O padding de cima dá espaço para o valor numérico não ser cortado */
+}
+
+/* Cada coluna representa uma pessoa/posição no ranking */
+.linha-grafico {
+  display: flex;
+  flex-direction: column; /* Empilha: trilha (com a barra) em cima, nome embaixo */
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 0; /* Todas as colunas dividem o espaço igualmente e encolhem juntas conforme a tela */
+  min-width: 0; /* Permite a coluna encolher além do tamanho do texto, evitando estourar a tela */
+}
+
+/* Caixa que fica embaixo de cada coluna, alinhada com a trilha/barra */
+.nome-pessoa {
+  width: 100%;
+}
+
+/* O texto do nome, centralizado horizontalmente sob a coluna. Em colunas muito estreitas,
+   o texto encolhe (clamp) e, se ainda não couber, ganha "..." no final em vez de vazar */
+.nome-texto {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(0.6rem, 1.6vw, 0.78rem);
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A "trilha" é o espaço de fundo por onde a barra pode crescer, agora na vertical.
+   Ela tem uma altura fixa (o "teto" do gráfico) e um leve preenchimento (padding),
+   isso é o que evita a barra colorida ficar colada no fundo da trilha */
+.trilha-barra {
+  width: 100%;
+  max-width: 44px; /* Impede que a barra fique enorme em telas muito largas */
+  height: clamp(140px, 32vh, 240px); /* A altura se adapta ao tamanho vertical da tela */
+  background-color: #1a1d24; /* Fundo sutil que marca visualmente o "trilho" onde a barra corre */
+  border-radius: 6px;
+  padding: 3px; /* Esse respiro é o que separa a barra colorida da base da trilha */
+  display: flex;
+  align-items: flex-end; /* Empurra a barra para baixo, fazendo ela "crescer" de baixo para cima */
+  justify-content: center;
+}
+
+/* A barra colorida em si, cuja altura é definida pelo JavaScript conforme o valor */
+.barra {
+  width: 100%;
+  border-radius: 4px 4px 0 0; /* Arredonda só o topo da barra, a base fica reta encostada na trilha */
+  transition: height 0.6s ease; /* Anima a barra "crescendo" quando o gráfico é montado */
+  min-height: 4px; /* Garante que mesmo valores pequenos apareçam como uma barrinha visível */
+  position: relative; /* Necessário para o valor numérico se posicionar sempre no topo da barra */
+}
+
+/* Valor numérico exibido flutuando acima do topo da barra */
+.valor-barra {
+  position: absolute;
+  top: -20px; /* Sobe o texto para ficar logo acima do topo atual da barra */
+  left: 50%;
+  transform: translateX(-50%); /* Centraliza o texto horizontalmente sobre a barra */
+  font-size: 0.7rem;
+  color: #e9e9ee;
+  white-space: nowrap; /* Impede que o número quebre linha */
+}
+
+/* Cor usada para todas as barras de Kanto — remete ao vermelho de Pokémon Red */
+.regiaoA {
+  background-color: #dc2626;
+}
+
+/* Cor usada para todas as barras de Johto — remete ao dourado de Pokémon Gold */
+.regiaoB {
+  background-color: #d4a017;
+}
+
+/* Legenda no rodapé mostrando o que cada cor representa */
+.legenda {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.item-legenda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cor-legenda {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* RODAPÉ: fica sempre na base da tela (o flex-column do body + o flex:1 do .conteudo cuidam disso),
+   mesmo em páginas com pouco conteúdo. Espaço reservado para créditos, contato, links etc. */
+.rodape {
+  border-top: 1px solid #1c1f27; /* Linha sutil separando o footer do conteúdo */
+  padding: 18px 32px;
+  text-align: center;
+  color: #6b7280; /* Cinza apagado, por ser uma informação secundária */
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rodape-contato a {
+  color: #ee1515; /* Mesma cor de destaque usada no resto do site, para manter consistência */
+  text-decoration: none;
+}
+
+.rodape-contato a:hover {
+  text-decoration: underline;
+}
+
+/* Em telas muito estreitas (celular), encolher 20 colunas até caber deixaria tudo ilegível.
+   Nesse caso específico, priorizamos a legibilidade: as colunas voltam a ter um tamanho
+   mínimo fixo, e a rolagem horizontal (que evitamos no resto do site) é a solução aqui. */
+@media (max-width: 640px) {
+  .cabecalho {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .cabecalho-textos {
+    text-align: center;
+  }
+
+  .grafico {
+    justify-content: flex-start;
+    overflow-x: auto; /* Única situação em que permitimos rolagem: telas muito estreitas */
+    gap: 14px;
+  }
+
+  .linha-grafico {
+    flex: 0 0 auto; /* As colunas deixam de encolher e passam a ter tamanho fixo */
+    width: 42px;
+  }
+
+  .trilha-barra {
+    max-width: 34px;
+    height: clamp(120px, 28vh, 180px);
+  }
+
+  .nome-texto {
+    font-size: 0.68rem;
+  }
+}

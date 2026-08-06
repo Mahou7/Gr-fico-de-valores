@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" /> <!-- Define a codificação de caracteres, importante para acentos funcionarem -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Faz a página se adaptar a telas de celular -->
+  <title>Comparativo de Riqueza entre Regiões</title>
+  <link rel="stylesheet" href="style.css" /> <!-- Conecta o arquivo de estilos (CSS) a essa página -->
+</head>
+<body>
+
+  <!-- CABEÇALHO: título à esquerda e botões à direita, distribuídos dinamicamente com flexbox.
+       Em telas estreitas, o CSS empilha os dois grupos automaticamente (ver style.css) -->
+  <header class="cabecalho">
+    <div class="cabecalho-textos">
+      <h1>Top 10 mais ricos: <span class="destaque destaque-kanto">Kanto</span> vs <span class="destaque destaque-johto">Johto</span></h1>
+      <p class="subtitulo">Comparativo entre as duas regiões, posição por posição</p>
+      <div class="atualizado">
+        <label for="seletorData">Dados de:</label>
+        <!-- As opções desse seletor são preenchidas dinamicamente pelo script.js,
+             uma para cada snapshot salvo (ver o array "snapshots" no topo do arquivo) -->
+        <select id="seletorData"></select>
+      </div>
+    </div>
+
+    <!-- Botões para trocar como o gráfico é exibido -->
+    <div class="controles">
+      <button id="btnLado" class="botao ativo">Lado a lado</button>
+      <button id="btnRanking" class="botao">Ranking geral</button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL: ocupa todo o espaço vertical sobrando entre header e footer,
+       e centraliza o gráfico nesse espaço (é isso que resolve o "vazio" que sobrava embaixo) -->
+  <main class="conteudo">
+    <!-- Esse <div> vazio vai ser preenchido dinamicamente pelo JavaScript com as colunas do gráfico -->
+    <div id="grafico" class="grafico"></div>
+
+    <!-- Legenda explicando as cores usadas no gráfico -->
+    <div class="legenda">
+      <div class="item-legenda">
+        <span class="cor-legenda regiaoA"></span> Kanto
+      </div>
+      <div class="item-legenda">
+        <span class="cor-legenda regiaoB"></span> Johto
+      </div>
+    </div>
+  </main>
+
+  <!-- RODAPÉ: espaço reservado para créditos/contato. Troque pelos seus dados reais -->
+  <footer class="rodape">
+    <p>Desenvolvido como projeto de estudo em HTML, CSS e JavaScript.</p>
+    <p class="rodape-contato">Nathã Cazelato · Cazelato@exemplo.com · <a href="#">GitHub</a></p>
+  </footer>
+
+  <script src="script.js"></script> <!-- Conecta o arquivo JavaScript, que contém a lógica do gráfico -->
+</body>
+</html>
