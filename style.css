@@ -748,6 +748,26 @@ body {
   color: var(--texto);
 }
 
+/* SUPORTE A TOQUE (celular/tablet): como :hover não existe de verdade no toque,
+   o JavaScript adiciona a classe .toque-ativo ao tocar numa coluna/fatia — aqui
+   ela dispara exatamente as mesmas animações já usadas no hover do mouse */
+.linha-grafico.toque-ativo .barra {
+  animation: pulsar-barra 1.1s ease-in-out infinite;
+}
+
+.linha-grafico.toque-ativo .nome-texto {
+  color: var(--texto-hover);
+}
+
+.linha-grafico.toque-ativo .valor-barra {
+  color: var(--texto-hover-forte);
+  font-weight: 600;
+}
+
+.fatia-pizza.toque-ativo {
+  animation: pulsar-fatia 1.1s ease-in-out infinite;
+}
+
 /* Aviso de quem caiu do Top 10 desde a última atualização — escondido por padrão,
    o JavaScript só mostra (display: block) quando há alguém pra listar */
 .nota-saidas {
@@ -790,6 +810,13 @@ body {
   border-color: var(--borda-forte);
 }
 
+/* Estado enquanto a imagem está sendo gerada (ver script.js) — evita a sensação
+   de que o clique não fez nada, já que html2canvas não é instantâneo */
+.botao-baixar:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 /* RODAPÉ: fica sempre na base da tela (o flex-column do body + o flex:1 do .conteudo cuidam disso),
    mesmo em páginas com pouco conteúdo. Espaço reservado para créditos, contato, links etc. */
 .rodape {
@@ -810,6 +837,13 @@ body {
 
 .rodape-contato a:hover {
   text-decoration: underline;
+}
+
+/* Dica discreta dos atalhos de teclado, no rodapé */
+.atalhos-dica {
+  font-size: 0.72rem;
+  color: var(--texto-muted-forte);
+  opacity: 0.8;
 }
 
 /* Em telas muito estreitas (celular), encolher 20 colunas até caber deixaria tudo ilegível.

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Círculo de fundo, com uma borda escura sutil -->
+  <circle cx="32" cy="32" r="30" fill="#0f1115" stroke="#2c2f38" stroke-width="2" />
+
+  <!-- Metade direita: vermelho de Kanto -->
+  <path d="M32 4 A28 28 0 0 1 32 60 Z" fill="#dc2626" />
+
+  <!-- Metade esquerda: dourado de Johto -->
+  <path d="M32 4 A28 28 0 0 0 32 60 Z" fill="#d4a017" />
+
+  <!-- Linha central e círculo pequeno, remetendo ao botão de uma Pokébola -->
+  <rect x="2" y="30" width="60" height="4" fill="#0f1115" />
+  <circle cx="32" cy="32" r="9" fill="#0f1115" />
+  <circle cx="32" cy="32" r="6" fill="#e9e9ee" />
+</svg>

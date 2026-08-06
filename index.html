@@ -4,7 +4,16 @@
   <meta charset="UTF-8" /> <!-- Define a codificação de caracteres, importante para acentos funcionarem -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Faz a página se adaptar a telas de celular -->
   <title>Comparativo de Riqueza entre Regiões</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" /> <!-- Ícone da aba do navegador -->
   <link rel="stylesheet" href="style.css" /> <!-- Conecta o arquivo de estilos (CSS) a essa página -->
+
+  <!-- OPEN GRAPH: essas meta tags são o que WhatsApp, Discord, Twitter etc. leem para
+       montar o "cartãozinho" de prévia quando alguém cola o link — sem elas, aparece
+       só o link cru, sem título nem descrição -->
+  <meta property="og:title" content="Comparativo de Riqueza — Kanto vs Johto" />
+  <meta property="og:description" content="Ranking do baltop, atualizado semanalmente, comparando os 10 mais ricos de Kanto e Johto." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
 </head>
 <body>
 
@@ -86,6 +95,7 @@
   <footer class="rodape">
     <p>Desenvolvido como projeto de estudo em HTML, CSS e JavaScript.</p>
     <p class="rodape-contato">Nathã Cazelato · Cazelato@exemplo.com · <a href="#">GitHub</a></p>
+    <p class="atalhos-dica">Atalhos: ← → trocam a data · 1 2 3 trocam o modo</p>
   </footer>
 
   <!-- Biblioteca externa usada só pelo botão "Baixar gráfico como imagem" — converte

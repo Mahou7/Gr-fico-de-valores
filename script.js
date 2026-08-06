@@ -773,6 +773,21 @@ function atualizarURL() {
   window.history.replaceState(null, "", novaURL);
 }
 
+// Lê o último modo/tipo de gráfico salvos de uma visita anterior (ver o
+// localStorage.setItem em redesenharGraficoAtual). Chamada ANTES de
+// restaurarEstadoDaURL(), pra um link compartilhado sempre ter prioridade
+function restaurarPreferenciasSalvas() {
+  const modoSalvo = localStorage.getItem("baltop-modo");
+  const tipoSalvo = localStorage.getItem("baltop-tipo");
+
+  if (["lado", "ranking", "evolucao"].includes(modoSalvo)) {
+    modoAtual = modoSalvo;
+  }
+  if (["colunas", "pizza"].includes(tipoSalvo)) {
+    tipoGrafico = tipoSalvo;
+  }
+}
+
 // Lê o modo/data/tipo salvos na URL (se houver) e aplica ANTES do primeiro desenho.
 // Chamado uma única vez, no carregamento da página
 function restaurarEstadoDaURL() {
@@ -809,7 +824,51 @@ btnCopiarLink.addEventListener("click", () => {
 });
 
 // ===================================================================
-// ATALHOS DE TECLADO
+// SUPORTE A TOQUE (celular/tablet)
+// :hover não existe de verdade em telas de toque, então o destaque das colunas
+// e fatias (pulsar, mostrar nome) não disparava sozinho. Aqui simulamos o mesmo
+// efeito: tocar numa coluna/fatia adiciona a classe .toque-ativo (que o CSS já
+// sabe animar, ver .toque-ativo no style.css), e tocar fora do gráfico limpa tudo
+// ===================================================================
+function limparDestaqueToque() {
+  document.querySelectorAll(".toque-ativo").forEach((el) => el.classList.remove("toque-ativo"));
+  document.querySelectorAll(".pizza-rotulo-hover.visivel").forEach((el) => el.classList.remove("visivel"));
+}
+
+// Delegação de evento: como as colunas/fatias são recriadas a cada redesenho,
+// escutar no container (que sempre existe) evita ter que reanexar o listener toda vez
+containerGrafico.addEventListener(
+  "touchstart",
+  (evento) => {
+    const linha = evento.target.closest(".linha-grafico");
+    const fatia = evento.target.closest(".fatia-pizza");
+
+    limparDestaqueToque(); // Só uma coluna/fatia destacada por vez
+
+    if (linha) {
+      linha.classList.add("toque-ativo");
+    } else if (fatia) {
+      fatia.classList.add("toque-ativo");
+      // Reaproveita o listener de "mouseenter" já existente em criarPizzaSvg,
+      // que preenche e mostra o rótulo central com o nome e a porcentagem
+      fatia.dispatchEvent(new Event("mouseenter"));
+    }
+  },
+  { passive: true }
+);
+
+// Tocar em qualquer lugar FORA do gráfico limpa o destaque atual
+document.addEventListener(
+  "touchstart",
+  (evento) => {
+    if (!containerGrafico.contains(evento.target)) {
+      limparDestaqueToque();
+    }
+  },
+  { passive: true }
+);
+
+
 // ← → trocam a data selecionada; 1, 2, 3 trocam entre Lado a lado / Ranking / Evolução.
 // Fica desligado enquanto o usuário está digitando em algum campo (busca, seletor)
 // ===================================================================
@@ -860,6 +919,11 @@ function redesenharGraficoAtual() {
   // Guarda o estado atual (modo, data, tipo) na URL, pra dar pra compartilhar um link
   // direto que já abre nessa mesma visualização (ver atualizarURL e btnCopiarLink)
   atualizarURL();
+
+  // Lembra o último modo/tipo visto, pra próxima vez que a página for aberta sem
+  // um link específico (ver restaurarPreferenciasSalvas, chamada no carregamento)
+  localStorage.setItem("baltop-modo", modoAtual);
+  localStorage.setItem("baltop-tipo", tipoGrafico);
 
   // No modo evolução o gráfico já mostra TODAS as datas de uma vez, então o seletor
   // de data individual não se aplica — ele fica desabilitado (mas continua visível)
@@ -981,20 +1045,33 @@ btnBaixarImagem.addEventListener("click", () => {
   // Pega a cor de fundo do tema ATUAL (claro ou escuro), pra imagem sair coerente
   const corDeFundoAtual = getComputedStyle(document.documentElement).getPropertyValue("--fundo").trim();
 
-  html2canvas(containerGrafico, { backgroundColor: corDeFundoAtual, scale: 2 }).then((canvas) => {
-    const link = document.createElement("a");
-    const dataDoSnapshot = snapshots[indiceSnapshotAtual].data.replaceAll("/", "-");
-    link.download = `baltop-${modoAtual}-${dataDoSnapshot}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
+  // html2canvas não é instantâneo — sem isso, o clique pareceria não ter feito nada
+  const textoOriginalBotao = btnBaixarImagem.textContent;
+  btnBaixarImagem.textContent = "Gerando imagem...";
+  btnBaixarImagem.disabled = true;
+
+  html2canvas(containerGrafico, { backgroundColor: corDeFundoAtual, scale: 2 })
+    .then((canvas) => {
+      const link = document.createElement("a");
+      const dataDoSnapshot = snapshots[indiceSnapshotAtual].data.replaceAll("/", "-");
+      link.download = `baltop-${modoAtual}-${dataDoSnapshot}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    })
+    .finally(() => {
+      // "finally" roda tanto se deu certo quanto se deu erro, garantindo que o
+      // botão sempre volte ao normal
+      btnBaixarImagem.textContent = textoOriginalBotao;
+      btnBaixarImagem.disabled = false;
+    });
 });
 
 // Aplica o tema salvo de uma visita anterior (ou "escuro" como padrão)
 aplicarTema(localStorage.getItem("baltop-tema") || "escuro");
 
-// Lê o modo/data/tipo da URL (se alguém abriu um link compartilhado) ANTES do
-// primeiro desenho, pra já carregar direto na visualização certa
+// Restaura o último modo/tipo salvos localmente — e, se a página foi aberta a
+// partir de um link compartilhado, a URL tem prioridade e sobrescreve isso
+restaurarPreferenciasSalvas();
 restaurarEstadoDaURL();
 
 // Desenha o gráfico pela primeira vez assim que a página carrega
