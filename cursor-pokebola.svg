@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <!-- Metade superior (vermelha) -->
+  <rect x="6" y="2" width="12" height="8" fill="#e3350d" stroke="#0f0f0f" stroke-width="1.5" />
+  <!-- Metade inferior (branca) -->
+  <rect x="6" y="10" width="12" height="8" fill="#f5f5f5" stroke="#0f0f0f" stroke-width="1.5" />
+  <!-- Linha central preta -->
+  <rect x="4" y="9.5" width="16" height="2" fill="#0f0f0f" />
+  <!-- Botão central -->
+  <circle cx="12" cy="10.5" r="3.4" fill="#0f0f0f" />
+  <circle cx="12" cy="10.5" r="1.8" fill="#f5f5f5" />
+</svg>

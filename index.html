@@ -35,17 +35,39 @@
     <div class="cabecalho-textos">
       <p class="kicker">Relatório Semanal · Baltop</p>
       <h1><span class="titulo-lead">Top 10 mais ricos:</span> <span class="destaque destaque-kanto">Kanto</span> <span class="versus">VS</span> <span class="destaque destaque-johto">Johto</span></h1>
-      <p class="subtitulo">Comparativo entre as duas regiões, posição por posição</p>
+      <!-- Preenchido pelo JavaScript conforme o modo — o texto muda porque "posição
+           por posição" só faz sentido no modo "Por Região", não nos outros dois -->
+      <p class="subtitulo" id="subtitulo"></p>
     </div>
 
     <!-- Coluna central: fica exatamente no meio do cabeçalho (grid de 3 colunas,
          ver .cabecalho no CSS), independente do quanto o texto ou os controles
-         ao redor ocupam — preenchido pelo JavaScript comparando o total das duas
-         regiões no snapshot atual, no estilo "citação em destaque" de reportagem -->
-    <p class="resumo-comparativo">
-      <span class="resumo-numero" id="resumoNumero"></span>
-      <span class="resumo-legenda" id="resumoLegenda"></span>
-    </p>
+         ao redor ocupam. O JavaScript preenche o número/legenda comparando o total
+         das duas regiões, e as duas barras de HP logo abaixo, no mesmo estilo de
+         uma tela de batalha do jogo */ -->
+    <div class="cabecalho-centro">
+      <p class="resumo-comparativo">
+        <span class="resumo-numero" id="resumoNumero"></span>
+        <span class="resumo-legenda" id="resumoLegenda"></span>
+      </p>
+
+      <!-- Duas barras de vida, como as de uma tela de batalha — preenchidas pelo
+           JavaScript proporcionalmente ao total de cada região no snapshot atual -->
+      <div class="barras-hp">
+        <div class="barra-hp-linha">
+          <span class="barra-hp-legenda">KANTO</span>
+          <div class="barra-hp-trilha">
+            <div class="barra-hp-preenchimento regiaoA" id="barraHpKanto"></div>
+          </div>
+        </div>
+        <div class="barra-hp-linha">
+          <span class="barra-hp-legenda">JOHTO</span>
+          <div class="barra-hp-trilha">
+            <div class="barra-hp-preenchimento regiaoB" id="barraHpJohto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Agrupa os controles de modo/tema e o seletor de data/contador numa coluna só,
          à direita — antes eles ficavam espalhados, deixando a coluna esquerda muito
@@ -77,9 +99,18 @@
     </div>
   </header>
 
+  <!-- Flash branco rápido ao trocar de modo (Por Região/Ranking/Evolução), como a
+       tela que pisca quando uma batalha começa no jogo — ver dispararFlash() no JS -->
+  <div class="tela-flash" id="telaFlash"></div>
+
   <!-- CONTEÚDO PRINCIPAL: ocupa todo o espaço vertical sobrando entre header e footer,
        e centraliza o gráfico nesse espaço (é isso que resolve o "vazio" que sobrava embaixo) -->
   <main class="conteudo">
+    <!-- CARD DE CAMPEÃO: só aparece no modo "Ranking geral", destacando o 1º lugar
+         geral com uma cabeça maior e a contagem de quantas vezes essa pessoa já
+         apareceu em 1º no histórico de snapshots — preenchido pelo JavaScript -->
+    <div class="cartao-campeao" id="cartaoCampeao"></div>
+
     <!-- PÓDIO: preenchido pelo JavaScript conforme o modo — um pódio único (top 3 geral)
          no modo "Ranking geral", ou dois pódios lado a lado (um por região) no modo
          "Por Região". Some no modo "Evolução", onde não existe um "top 3" atual —

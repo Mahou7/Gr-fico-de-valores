@@ -93,6 +93,20 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease; /* Suaviza a troca de tema */
 }
 
+/* CURSOR PERSONALIZADO: uma Pokébola pixelada no lugar da "mãozinha" padrão do
+   navegador, em qualquer elemento clicável. O "12 12" depois da URL define o
+   "ponto de clique" do cursor como o centro do desenho (ele é 24x24) — sem isso,
+   o navegador usaria o canto superior esquerdo, o que erra a mira visualmente.
+   O ", pointer" no final é o reserva, caso o arquivo não carregue por algum motivo */
+button,
+a,
+select,
+.linha-grafico,
+.fatia-pizza,
+.ponto-evolucao {
+  cursor: url("cursor-pokebola.svg") 12 12, pointer;
+}
+
 /* Linha fina no topo da página — um único traço de cor, não uma faixa
    multicolorida. Discreto o bastante para não competir com o resto da UI */
 .faixa-decorativa {
@@ -100,6 +114,35 @@ body {
   width: 100%;
   background: var(--acento);
   flex-shrink: 0;
+}
+
+/* FLASH DE BATALHA: um clarão branco rápido ao trocar de modo (Por Região/Ranking/
+   Evolução), como a tela que pisca quando um combate começa no jogo. Fica sempre
+   presente no DOM mas invisível (opacity: 0) — a classe "ativo" (adicionada via
+   JavaScript em dispararFlash) é o que dispara a animação */
+.tela-flash {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none; /* Nunca bloqueia cliques, mesmo durante a animação */
+  z-index: 999;
+}
+
+.tela-flash.ativo {
+  animation: flash-batalha 0.35s ease-out;
+}
+
+@keyframes flash-batalha {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Usamos o ID (#grafico) em vez da classe porque o className desse elemento é
@@ -135,7 +178,11 @@ body {
 
 /* Independente de quanto texto/controles existam nos dois lados, o grid de 3
    colunas garante que essa coluna do meio fique exatamente centralizada */
-.cabecalho .resumo-comparativo {
+.cabecalho-centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   justify-self: center;
 }
 
@@ -243,6 +290,42 @@ body {
   color: var(--texto-muted);
   line-height: 1.35;
   max-width: 220px;
+}
+
+/* BARRAS DE HP: duas barrinhas de vida, como as de uma tela de batalha do jogo,
+   preenchidas proporcionalmente ao total de cada região (ver atualizarResumoComparativo) */
+.barras-hp {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 220px;
+}
+
+.barra-hp-linha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.barra-hp-legenda {
+  font-family: var(--fonte-display);
+  font-size: 0.5rem;
+  width: 44px;
+  flex-shrink: 0;
+  color: var(--texto-muted);
+}
+
+.barra-hp-trilha {
+  flex: 1;
+  height: 10px;
+  background: var(--fundo-trilha);
+  border: 2px solid var(--borda);
+  padding: 1px;
+}
+
+.barra-hp-preenchimento {
+  height: 100%;
+  transition: width 0.5s ease; /* Anima a barra "enchendo" ao trocar de data */
 }
 
 /* Linha discreta com o seletor de data (o "backup" de snapshots antigos) */
@@ -575,6 +658,64 @@ body {
   display: none; /* Não ocupa espaço quando está vazio */
 }
 
+/* CARD DE CAMPEÃO: destaque maior pro 1º lugar geral, só no modo "Ranking geral" —
+   como um cartão de treinador. Escondido (display:none via :empty) nos outros modos */
+.cartao-campeao {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 24px;
+  border: 3px solid var(--borda);
+  background: var(--fundo-elevado);
+}
+
+.cartao-campeao:empty {
+  display: none;
+}
+
+.cartao-campeao .podio-cabeca-wrap {
+  flex-shrink: 0;
+}
+
+.cartao-campeao .podio-cabeca {
+  width: 72px;
+  height: 72px;
+  border: 3px solid #c7c7c7;
+}
+
+.cartao-campeao-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* O rótulo "CAMPEÃO", na cor de acento pra chamar atenção — é o único lugar do
+   card com cor viva de propósito, o resto fica neutro */
+.cartao-campeao-titulo {
+  font-family: var(--fonte-display);
+  font-size: 0.6rem;
+  color: var(--acento);
+}
+
+.cartao-campeao-nome {
+  font-family: var(--fonte-corpo);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--texto);
+}
+
+.cartao-campeao-valor {
+  font-family: var(--fonte-dados);
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+}
+
+.cartao-campeao-historico {
+  font-family: var(--fonte-corpo);
+  font-size: 0.72rem;
+  color: var(--texto-muted);
+}
+
 /* PÓDIO: top 3 do snapshot atual, cada um com a cabeça da skin, nome e valor.
    Ordem visual 2º-1º-3º (o clássico "degrau" de pódio), controlada via CSS order —
    no HTML os três vêm sempre na ordem 1º/2º/3º (mais simples de montar no JavaScript) */
@@ -637,9 +778,17 @@ body {
   order: 3;
 }
 
+/* Wrapper da cabeça — existe principalmente pra dar um "âncora" de posicionamento
+   pros brilhinhos do efeito shiny (ver .shiny abaixo) */
+.podio-cabeca-wrap {
+  position: relative;
+  display: inline-block;
+}
+
 /* A cabeça da skin do jogador. image-rendering: pixelated evita o navegador
    "borrar" a imagem ao ampliar — mantém o visual quadriculado autêntico do jogo */
 .podio-cabeca {
+  display: block;
   width: 48px;
   height: 48px;
   border: 3px solid #c7c7c7;
@@ -650,6 +799,46 @@ body {
 .podio-lugar.lugar-1 .podio-cabeca {
   width: 64px;
   height: 64px;
+}
+
+/* EFEITO SHINY: só no 1º lugar — a mesma linguagem visual que qualquer jogador
+   de Pokémon reconhece na hora como "isso aqui é raro/especial". Duas estrelinhas
+   (pseudo-elementos, texto "✦") piscando em cantos opostos, com atraso diferente
+   entre elas pra não brilharem exatamente ao mesmo tempo */
+.shiny::before,
+.shiny::after {
+  content: "✦";
+  position: absolute;
+  font-size: 14px;
+  color: #fff9c4;
+  text-shadow: 0 0 4px #fff, 0 0 8px #ffe066;
+  animation: brilho-shiny 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.shiny::before {
+  top: -8px;
+  left: -8px;
+  animation-delay: 0s;
+}
+
+.shiny::after {
+  bottom: -6px;
+  right: -8px;
+  font-size: 10px;
+  animation-delay: 0.5s;
+}
+
+@keyframes brilho-shiny {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(20deg);
+  }
 }
 
 .podio-medalha {
@@ -1168,6 +1357,21 @@ body {
    Nesse caso específico, priorizamos a legibilidade: as colunas voltam a ter um tamanho
    mínimo fixo, e a rolagem horizontal (que evitamos no resto do site) é a solução aqui. */
 @media (max-width: 640px) {
+  .cartao-campeao {
+    flex-direction: column;
+    text-align: center;
+    width: 100%;
+  }
+
+  .cartao-campeao-textos {
+    align-items: center;
+  }
+
+  .barras-hp {
+    width: 100%;
+    max-width: 260px;
+  }
+
   .podio {
     gap: 6px;
   }
@@ -1215,7 +1419,7 @@ body {
     justify-content: center;
   }
 
-  .cabecalho .resumo-comparativo {
+  .cabecalho-centro {
     justify-self: center;
   }
 

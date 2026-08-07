@@ -9,7 +9,7 @@
 // ===================================================================
 const snapshots = [
   {
-    data: "05/08/2026",
+    data: "03/08/2026",
     regiaoA: [
       { nome: "Mandaleri", valor: 2452695562 },
       { nome: "Diig_Uchis", valor: 820464560 },
@@ -23,15 +23,15 @@ const snapshots = [
       { nome: "Nynx", valor: 141648035 },
     ],
     regiaoB: [
-      { nome: "Mahou", valor: 475141074 },
-      { nome: "WolgraD", valor: 364804280 },
-      { nome: "adri_wasd", valor: 353317158 },
-      { nome: "TIAMAT_", valor: 314974168 },
+      { nome: "Mahou", valor: 432383074 },
+      { nome: "WolgraD", valor: 367259720 },
+      { nome: "adri_wasd", valor: 353467308 },
+      { nome: "TIAMAT_", valor: 314474168 },
       { nome: "YuuichiHeinhz", valor: 124354732 },
-      { nome: "eilexnn", valor: 107804259 },
-      { nome: "0luas", valor: 101989051 },
-      { nome: "Juanfefe", valor: 97264216 },
-      { nome: "Erustes5", valor: 91426535 },
+      { nome: "eilexnn", valor: 107824259 },
+      { nome: "0luas", valor: 101723361 },
+      { nome: "Juanfefe", valor: 98342746 },
+      { nome: "Erustes5", valor: 90455785 },
       { nome: "andy", valor: 88615191 },
     ],
   },
@@ -87,6 +87,11 @@ const tituloGrafico = document.getElementById("tituloGrafico");
 const resumoNumeroEl = document.getElementById("resumoNumero");
 const resumoLegendaEl = document.getElementById("resumoLegenda");
 const podiosWrapEl = document.getElementById("podiosWrap");
+const subtituloEl = document.getElementById("subtitulo");
+const barraHpKantoEl = document.getElementById("barraHpKanto");
+const barraHpJohtoEl = document.getElementById("barraHpJohto");
+const cartaoCampeaoEl = document.getElementById("cartaoCampeao");
+const telaFlashEl = document.getElementById("telaFlash");
 const btnTema = document.getElementById("btnTema");
 const btnCopiarLink = document.getElementById("btnCopiarLink");
 
@@ -705,14 +710,15 @@ function atualizarResumoComparativo() {
   // destaque de reportagem), a legenda embaixo explica o que ele significa
   resumoNumeroEl.textContent = `${percentualFormatado}%`;
   resumoLegendaEl.textContent = `${maiorNome} à frente de ${menorNome} neste snapshot — Top 10 de cada região`;
+
+  // Barras de HP: cada uma preenche proporcionalmente à fatia daquela região no
+  // total combinado (as duas juntas somam 100%, como duas barras de vida numa
+  // tela de batalha — a região "na frente" fica com a barra mais cheia)
+  const totalCombinado = totalA + totalB;
+  barraHpKantoEl.style.width = `${(totalA / totalCombinado) * 100}%`;
+  barraHpJohtoEl.style.width = `${(totalB / totalCombinado) * 100}%`;
 }
 
-// ===================================================================
-// PÓDIO
-// Monta o top 3 geral (Kanto + Johto combinados) do snapshot atual, com a
-// cabeça da skin de cada jogador. Usa o serviço público minotar.net, que gera
-// a imagem a partir do nome de usuário — precisa de internet pra carregar
-// ===================================================================
 // ===================================================================
 // SKINS PERSONALIZADAS
 // O minotar.net (usado como reserva abaixo) busca a skin pela API oficial da
@@ -755,7 +761,13 @@ function criarPodio(pessoas, titulo) {
     // A cabeça da skin: primeiro olha se esse nome está em skinsPersonalizadas
     // (skins definidas manualmente); se não estiver, usa o minotar.net como reserva.
     // encodeURIComponent evita que nomes com caracteres estranhos (como o
-    // "<impactor:account:name>" que apareceu nos dados) quebrem a URL da imagem
+    // "<impactor:account:name>" que apareceu nos dados) quebrem a URL da imagem.
+    // Fica dentro de um wrapper porque o efeito "shiny" do 1º lugar usa pseudo-elementos
+    // (::before/::after) pra desenhar os brilhinhos, e isso não funciona de forma
+    // confiável direto numa tag <img> em todos os navegadores
+    const cabecaWrap = document.createElement("div");
+    cabecaWrap.className = posicao === 1 ? "podio-cabeca-wrap shiny" : "podio-cabeca-wrap";
+
     const cabeca = document.createElement("img");
     cabeca.className = "podio-cabeca";
     cabeca.src =
@@ -763,6 +775,7 @@ function criarPodio(pessoas, titulo) {
       `https://minotar.net/avatar/${encodeURIComponent(pessoa.nome)}/64`;
     cabeca.alt = pessoa.nome;
     cabeca.loading = "lazy";
+    cabecaWrap.appendChild(cabeca);
 
     const medalha = document.createElement("div");
     medalha.className = "podio-medalha";
@@ -785,7 +798,7 @@ function criarPodio(pessoas, titulo) {
     degrau.className = `podio-degrau ${pessoa.regiao}`;
     degrau.textContent = `${posicao}º`;
 
-    lugar.appendChild(cabeca);
+    lugar.appendChild(cabecaWrap);
     lugar.appendChild(medalha);
     lugar.appendChild(nome);
     lugar.appendChild(valor);
@@ -822,6 +835,88 @@ function atualizarPodio() {
     podiosWrapEl.appendChild(criarPodio(kanto, "Kanto"));
     podiosWrapEl.appendChild(criarPodio(johto, "Johto"));
   }
+}
+
+// ===================================================================
+// CARD DE CAMPEÃO
+// Só aparece no modo "Ranking geral": destaca o 1º lugar geral com uma cabeça
+// maior e a contagem de quantas vezes essa pessoa já apareceu em 1º no
+// histórico de snapshots (até e incluindo a data selecionada agora)
+// ===================================================================
+
+// Conta em quantos snapshots (do primeiro até o "ateIndice") essa pessoa foi
+// o 1º lugar geral (comparando o maior valor entre as duas regiões)
+function contarVezesCampeao(nome, ateIndice) {
+  let contagem = 0;
+
+  for (let i = 0; i <= ateIndice; i++) {
+    const snap = snapshots[i];
+    const todos = [...snap.regiaoA, ...snap.regiaoB];
+    const maior = todos.reduce((a, b) => (b.valor > a.valor ? b : a));
+    if (maior.nome === nome) contagem++;
+  }
+
+  return contagem;
+}
+
+function atualizarCartaoCampeao() {
+  cartaoCampeaoEl.innerHTML = "";
+
+  if (modoAtual !== "ranking") {
+    return; // Só faz sentido no modo que junta as duas regiões numa lista só
+  }
+
+  const { regiaoA, regiaoB } = snapshots[indiceSnapshotAtual];
+  const todosComRegiao = [
+    ...regiaoA.map((p) => ({ ...p, regiao: "regiaoA" })),
+    ...regiaoB.map((p) => ({ ...p, regiao: "regiaoB" })),
+  ];
+  const campeao = todosComRegiao.reduce((a, b) => (b.valor > a.valor ? b : a));
+
+  const vezes = contarVezesCampeao(campeao.nome, indiceSnapshotAtual);
+
+  const cabecaWrap = document.createElement("div");
+  cabecaWrap.className = "podio-cabeca-wrap shiny"; // Reaproveita o mesmo efeito shiny do pódio
+
+  const cabeca = document.createElement("img");
+  cabeca.className = "podio-cabeca";
+  cabeca.src =
+    skinsPersonalizadas[campeao.nome] ||
+    `https://minotar.net/avatar/${encodeURIComponent(campeao.nome)}/64`;
+  cabeca.alt = campeao.nome;
+  cabeca.loading = "lazy";
+  cabecaWrap.appendChild(cabeca);
+
+  const textos = document.createElement("div");
+  textos.className = "cartao-campeao-textos";
+
+  const titulo = document.createElement("div");
+  titulo.className = "cartao-campeao-titulo";
+  titulo.textContent = "🏆 CAMPEÃO";
+
+  const nome = document.createElement("div");
+  nome.className = "cartao-campeao-nome";
+  nome.textContent = campeao.nome;
+
+  const valor = document.createElement("div");
+  valor.className = "cartao-campeao-valor";
+  const valorEmMilhoes = campeao.valor / 1_000_000;
+  valor.textContent = `${valorEmMilhoes.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} KK`;
+
+  const historico = document.createElement("div");
+  historico.className = "cartao-campeao-historico";
+  historico.textContent = `${vezes}ª vez em 1º lugar no histórico`;
+
+  textos.appendChild(titulo);
+  textos.appendChild(nome);
+  textos.appendChild(valor);
+  textos.appendChild(historico);
+
+  cartaoCampeaoEl.appendChild(cabecaWrap);
+  cartaoCampeaoEl.appendChild(textos);
 }
 
 
@@ -1014,14 +1109,17 @@ document.addEventListener("keydown", (evento) => {
   } else if (evento.key === "1") {
     modoAtual = "lado";
     marcarBotaoAtivo(btnLado);
+    dispararFlash();
     redesenharGraficoAtual();
   } else if (evento.key === "2") {
     modoAtual = "ranking";
     marcarBotaoAtivo(btnRanking);
+    dispararFlash();
     redesenharGraficoAtual();
   } else if (evento.key === "3") {
     modoAtual = "evolucao";
     marcarBotaoAtivo(btnEvolucao);
+    dispararFlash();
     redesenharGraficoAtual();
   }
 });
@@ -1036,15 +1134,25 @@ function redesenharGraficoAtual() {
   // No estilo de uma reportagem de dados, cada gráfico ganha uma legenda de figura
   // ("FIG. 01 — ..."), como as que aparecem embaixo de imagens em uma matéria
   const legendasFigura = {
-    lado: "Fig. 01 — Lado a lado, Top 10 por região",
+    lado: "Fig. 01 — Por Região, Top 10 de cada uma",
     ranking: "Fig. 02 — Ranking geral, Top 20 combinado",
     evolucao: "Fig. 03 — Evolução histórica",
   };
   tituloGrafico.textContent = legendasFigura[modoAtual];
 
+  // O subtítulo também muda por modo — "posição por posição" só faz sentido
+  // comparando Kanto e Johto lado a lado, não nos outros dois modos
+  const subtitulos = {
+    lado: "Comparativo entre as duas regiões, posição por posição",
+    ranking: "As 20 pessoas de Kanto e Johto combinadas, do maior para o menor valor",
+    evolucao: "Como o total de cada região mudou ao longo das atualizações",
+  };
+  subtituloEl.textContent = subtitulos[modoAtual];
+
   // A frase comparativa depende só da data selecionada, não do modo/tipo de gráfico
   atualizarResumoComparativo();
   atualizarPodio();
+  atualizarCartaoCampeao();
 
   // Guarda o estado atual (modo, data, tipo) na URL, pra dar pra compartilhar um link
   // direto que já abre nessa mesma visualização (ver atualizarURL e btnCopiarLink)
@@ -1098,10 +1206,26 @@ function marcarBotaoTipoAtivo(botaoSelecionado) {
   botaoSelecionado.classList.add("ativo");
 }
 
+// ===================================================================
+// FLASH DE BATALHA
+// Um clarão branco rápido ao trocar de modo, como a tela que pisca quando um
+// combate começa no jogo. Usado só nas trocas de MODO (Por Região/Ranking/
+// Evolução) — trocar só a data ou o tipo de gráfico (Colunas/Pizza) não dispara
+// ===================================================================
+function dispararFlash() {
+  // Remove e força um "reflow" antes de adicionar de novo — sem isso, clicar
+  // duas vezes seguidas não reiniciaria a animação (o navegador ignora adicionar
+  // uma classe que já está lá)
+  telaFlashEl.classList.remove("ativo");
+  void telaFlashEl.offsetWidth; // Essa leitura "força" o navegador a recalcular o layout
+  telaFlashEl.classList.add("ativo");
+}
+
 // Quando o botão "Lado a lado" é clicado, muda o modo e redesenha
 btnLado.addEventListener("click", () => {
   modoAtual = "lado";
   marcarBotaoAtivo(btnLado);
+  dispararFlash();
   redesenharGraficoAtual();
 });
 
@@ -1109,6 +1233,7 @@ btnLado.addEventListener("click", () => {
 btnRanking.addEventListener("click", () => {
   modoAtual = "ranking";
   marcarBotaoAtivo(btnRanking);
+  dispararFlash();
   redesenharGraficoAtual();
 });
 
@@ -1116,6 +1241,7 @@ btnRanking.addEventListener("click", () => {
 btnEvolucao.addEventListener("click", () => {
   modoAtual = "evolucao";
   marcarBotaoAtivo(btnEvolucao);
+  dispararFlash();
   redesenharGraficoAtual();
 });
 
