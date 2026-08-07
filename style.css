@@ -93,10 +93,11 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease; /* Suaviza a troca de tema */
 }
 
-/* CURSOR PERSONALIZADO: uma Pokébola pixelada no lugar da "mãozinha" padrão do
-   navegador, em qualquer elemento clicável. O "12 12" depois da URL define o
-   "ponto de clique" do cursor como o centro do desenho (ele é 24x24) — sem isso,
-   o navegador usaria o canto superior esquerdo, o que erra a mira visualmente.
+/* CURSOR PERSONALIZADO: uma seta retrô (estilo menu de jogo antigo) no lugar da
+   "mãozinha" padrão do navegador, em qualquer elemento clicável. O "4 3" depois
+   da URL define o "ponto de clique" do cursor como a ponta superior da seta —
+   sem isso, o navegador usaria o canto superior esquerdo do desenho, o que erra
+   a mira visualmente.
    O ", pointer" no final é o reserva, caso o arquivo não carregue por algum motivo */
 button,
 a,
@@ -104,7 +105,7 @@ select,
 .linha-grafico,
 .fatia-pizza,
 .ponto-evolucao {
-  cursor: url("cursor-pokebola.svg") 12 12, pointer;
+  cursor: url("cursor-seta-retro.svg") 4 3, pointer;
 }
 
 /* Linha fina no topo da página — um único traço de cor, não uma faixa
@@ -141,6 +142,31 @@ select,
     opacity: 0.85;
   }
   100% {
+    opacity: 0;
+  }
+}
+
+/* EFEITO DE CLIQUE: já que o cursor em si (uma imagem parada) não pode ser
+   animado de verdade, esse pequeno "estouro" pixelado aparece no ponto exato
+   onde você clicou — criado e removido via JavaScript (ver dispararEfeitoClique) */
+.efeito-clique {
+  position: fixed;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--acento);
+  pointer-events: none; /* Nunca atrapalha o clique seguinte */
+  z-index: 1000;
+  animation: estourar-clique 0.35s ease-out forwards;
+}
+
+@keyframes estourar-clique {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2) rotate(25deg);
     opacity: 0;
   }
 }
@@ -349,7 +375,6 @@ select,
   padding: 4px 8px;
   font-family: var(--fonte-dados); /* Datas em mono, como um carimbo de save file */
   font-size: 0.76rem;
-  cursor: pointer;
 }
 
 .atualizado select:hover {
@@ -420,7 +445,6 @@ select,
   border: none;
   border-right: 2px solid var(--borda-fraca);
   padding: 10px 14px;
-  cursor: pointer;
   font-family: var(--fonte-display); /* Fonte pixelada — texto de botão de menu de jogo de verdade */
   font-size: 0.55rem;
   letter-spacing: 0.02em;
@@ -466,7 +490,6 @@ select,
   border: 3px solid var(--borda);
   border-radius: 0;
   font-size: 1.05rem;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -521,7 +544,6 @@ select,
   gap: 8px;
   flex: 1 1 0; /* Todas as colunas dividem o espaço igualmente e encolhem juntas conforme a tela */
   min-width: 0; /* Permite a coluna encolher além do tamanho do texto, evitando estourar a tela */
-  cursor: pointer; /* Sinaliza que a coluna reage ao mouse, mesmo sem nenhum clique acontecer */
 }
 
 /* Caixa que fica embaixo de cada coluna, alinhada com a trilha/barra. Empilha
@@ -993,7 +1015,6 @@ select,
 .fatia-pizza {
   stroke: var(--fundo); /* Um contorno fino separa visualmente as fatias entre si */
   stroke-width: 2;
-  cursor: pointer;
   transform-box: fill-box;
   transform-origin: center;
   transition: filter 0.2s ease;
@@ -1143,7 +1164,6 @@ select,
   r: 5;
   stroke: var(--fundo);
   stroke-width: 2;
-  cursor: pointer;
   transition: r 0.2s ease;
 }
 
@@ -1297,7 +1317,6 @@ select,
   font-family: var(--fonte-display);
   font-size: 0.55rem;
   letter-spacing: 0.02em;
-  cursor: pointer;
   box-shadow: 3px 3px 0 var(--sombra-botao);
   transition: color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
 }

@@ -36,7 +36,7 @@ const snapshots = [
     ],
   },
   {
-    data: "06/08/2026",
+    data: "05/08/2026",
     regiaoA: [
       { nome: "Mandaleri", valor: 2600547562 },
       { nome: "Diig_Uchis", valor: 816164561 },
@@ -724,15 +724,19 @@ function atualizarResumoComparativo() {
 // O minotar.net (usado como reserva abaixo) busca a skin pela API oficial da
 // Mojang — só funciona pra contas premium. Se esse for um servidor com contas
 // "cracked"/offline, ele não vai achar a skin de ninguém e vai mostrar o Steve
-// padrão pra todo mundo. Pra esses casos, adicione o jogador aqui manualmente:
+// padrão pra todo mundo. Pra esses casos, adicione o jogador aqui manualmente,
+// de duas formas:
 //
-// 1. Ache a skin da pessoa no NameMC (ex: https://namemc.com/skin/HASH)
-// 2. Troque o HASH abaixo pelo mesmo HASH que aparece no final da URL da skin
+// 1. Link de fora (ex: NameMC): ache a skin em https://namemc.com/skin/HASH e
+//    use https://s.namemc.com/2d/skin/face.png?id=HASH&scale=4
+// 2. Arquivo local: salve a imagem do ROSTO (não a skin inteira) numa pasta
+//    "skins" dentro do repositório, e use só o caminho relativo (ex: "skins/nome.png")
 //
 // Quem não estiver nesta lista cai automaticamente no minotar.net (que funciona
 // bem se o servidor usa contas oficiais da Mojang)
 const skinsPersonalizadas = {
   Mahou: "https://s.namemc.com/2d/skin/face.png?id=3d817103f3ef3dc4&scale=4",
+  TIAMAT_: "skins/TIAMAT_.png",
 };
 
 // Monta UM pódio (as 3 colunas com cabeça/medalha/nome/valor/degrau) a partir de
@@ -1220,6 +1224,24 @@ function dispararFlash() {
   void telaFlashEl.offsetWidth; // Essa leitura "força" o navegador a recalcular o layout
   telaFlashEl.classList.add("ativo");
 }
+
+// ===================================================================
+// EFEITO DE CLIQUE
+// O cursor em si é uma imagem parada (não dá pra animar via CSS), então esse é
+// o "substituto": um pequeno estouro pixelado aparece exatamente onde o mouse
+// clicou, em QUALQUER lugar da página, e se remove sozinho quando a animação termina
+// ===================================================================
+document.addEventListener("click", (evento) => {
+  const efeito = document.createElement("div");
+  efeito.className = "efeito-clique";
+  efeito.style.left = `${evento.clientX}px`;
+  efeito.style.top = `${evento.clientY}px`;
+  document.body.appendChild(efeito);
+
+  // "animationend" dispara assim que a animação CSS termina — é o gatilho pra
+  // remover o elemento do DOM, senão ele ficaria acumulando pra sempre
+  efeito.addEventListener("animationend", () => efeito.remove());
+});
 
 // Quando o botão "Lado a lado" é clicado, muda o modo e redesenha
 btnLado.addEventListener("click", () => {
