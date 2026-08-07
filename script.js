@@ -736,7 +736,7 @@ function atualizarResumoComparativo() {
 // bem se o servidor usa contas oficiais da Mojang)
 const skinsPersonalizadas = {
   Mahou: "https://s.namemc.com/2d/skin/face.png?id=3d817103f3ef3dc4&scale=4",
-  TIAMAT_: "skins/TIAMAT_.png",
+  TIAMAT_: "skinsTIAMAT_.png",
 };
 
 // Monta UM pódio (as 3 colunas com cabeça/medalha/nome/valor/degrau) a partir de
