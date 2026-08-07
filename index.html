@@ -14,43 +14,78 @@
   <meta property="og:description" content="Ranking do baltop, atualizado semanalmente, comparando os 10 mais ricos de Kanto e Johto." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
+
+  <!-- Tipografia de jogo retrô: Press Start 2P é a fonte pixelada 8-bit (usada só em
+       títulos/botões curtos — texto corrido nela seria ilegível), Rubik é a fonte de
+       interface (arredondada, como os menus modernos da franquia), e Space Mono dá
+       aos números aquele ar de "tela de status" -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+  <!-- Faixa decorativa no topo, com as três cores centrais da marca: vermelho de
+       Kanto, dourado de Johto e azul da Pokédex — o "elemento-assinatura" do site -->
+  <div class="faixa-decorativa"></div>
 
   <!-- CABEÇALHO: título à esquerda e botões à direita, distribuídos dinamicamente com flexbox.
        Em telas estreitas, o CSS empilha os dois grupos automaticamente (ver style.css) -->
   <header class="cabecalho">
     <div class="cabecalho-textos">
-      <h1>Top 10 mais ricos: <span class="destaque destaque-kanto">Kanto</span> vs <span class="destaque destaque-johto">Johto</span></h1>
+      <p class="kicker">Relatório Semanal · Baltop</p>
+      <h1><span class="titulo-lead">Top 10 mais ricos:</span> <span class="destaque destaque-kanto">Kanto</span> <span class="versus">VS</span> <span class="destaque destaque-johto">Johto</span></h1>
       <p class="subtitulo">Comparativo entre as duas regiões, posição por posição</p>
-      <!-- Preenchido pelo JavaScript: compara o total das duas regiões no snapshot atual -->
-      <p class="resumo-comparativo" id="resumoComparativo"></p>
-      <div class="atualizado">
-        <label for="seletorData">Dados de:</label>
-        <!-- As opções desse seletor são preenchidas dinamicamente pelo script.js,
-             uma para cada snapshot salvo (ver o array "snapshots" no topo do arquivo) -->
-        <select id="seletorData"></select>
-      </div>
-      <!-- Preenchido pelo JavaScript: calcula 7 dias após a data mais recente do histórico -->
-      <p class="proxima-atualizacao" id="proximaAtualizacao"></p>
     </div>
 
-    <div class="cabecalho-controles">
-      <!-- Botões para trocar como o gráfico é exibido -->
-      <div class="controles controles-principal">
-        <button id="btnLado" class="botao ativo">Lado a lado</button>
-        <button id="btnRanking" class="botao">Ranking geral</button>
-        <button id="btnEvolucao" class="botao">Evolução</button>
+    <!-- Coluna central: fica exatamente no meio do cabeçalho (grid de 3 colunas,
+         ver .cabecalho no CSS), independente do quanto o texto ou os controles
+         ao redor ocupam — preenchido pelo JavaScript comparando o total das duas
+         regiões no snapshot atual, no estilo "citação em destaque" de reportagem -->
+    <p class="resumo-comparativo">
+      <span class="resumo-numero" id="resumoNumero"></span>
+      <span class="resumo-legenda" id="resumoLegenda"></span>
+    </p>
+
+    <!-- Agrupa os controles de modo/tema e o seletor de data/contador numa coluna só,
+         à direita — antes eles ficavam espalhados, deixando a coluna esquerda muito
+         mais alta que a direita e um vazio embaixo dos botões -->
+    <div class="cabecalho-lateral">
+      <div class="cabecalho-controles">
+        <!-- Botões para trocar como o gráfico é exibido -->
+        <div class="controles controles-principal">
+          <button id="btnLado" class="botao ativo">Por Região</button>
+          <button id="btnRanking" class="botao">Ranking geral</button>
+          <button id="btnEvolucao" class="botao">Evolução</button>
+        </div>
+
+        <!-- Alterna entre tema escuro e claro, e lembra a escolha (localStorage) -->
+        <button id="btnTema" class="botao-tema" aria-label="Alternar tema claro/escuro" title="Alternar tema">🌙</button>
       </div>
 
-      <!-- Alterna entre tema escuro e claro, e lembra a escolha (localStorage) -->
-      <button id="btnTema" class="botao-tema" aria-label="Alternar tema claro/escuro" title="Alternar tema">🌙</button>
+      <!-- Seletor de data e contador de atualização -->
+      <div class="cabecalho-meta">
+        <div class="atualizado">
+          <label for="seletorData">Dados de:</label>
+          <!-- As opções desse seletor são preenchidas dinamicamente pelo script.js,
+               uma para cada snapshot salvo (ver o array "snapshots" no topo do arquivo) -->
+          <select id="seletorData"></select>
+        </div>
+        <!-- Preenchido pelo JavaScript: calcula 7 dias após a data mais recente do histórico -->
+        <p class="proxima-atualizacao" id="proximaAtualizacao"></p>
+      </div>
     </div>
   </header>
 
   <!-- CONTEÚDO PRINCIPAL: ocupa todo o espaço vertical sobrando entre header e footer,
        e centraliza o gráfico nesse espaço (é isso que resolve o "vazio" que sobrava embaixo) -->
   <main class="conteudo">
+    <!-- PÓDIO: preenchido pelo JavaScript conforme o modo — um pódio único (top 3 geral)
+         no modo "Ranking geral", ou dois pódios lado a lado (um por região) no modo
+         "Por Região". Some no modo "Evolução", onde não existe um "top 3" atual —
+         usa a cabeça da skin de cada jogador (serviço minotar.net, precisa de internet) -->
+    <div class="podios-wrap" id="podiosWrap"></div>
+
     <!-- Controle secundário (Colunas/Pizza) e a busca de jogador, lado a lado -->
     <div class="linha-controles-secundarios">
       <!-- Só faz sentido nos modos "Lado a lado" e "Ranking geral" — o JavaScript

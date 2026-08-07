@@ -84,7 +84,9 @@ const notaSaidas = document.getElementById("notaSaidas");
 const inputBusca = document.getElementById("buscaJogador");
 const btnBaixarImagem = document.getElementById("btnBaixarImagem");
 const tituloGrafico = document.getElementById("tituloGrafico");
-const resumoComparativoEl = document.getElementById("resumoComparativo");
+const resumoNumeroEl = document.getElementById("resumoNumero");
+const resumoLegendaEl = document.getElementById("resumoLegenda");
+const podiosWrapEl = document.getElementById("podiosWrap");
 const btnTema = document.getElementById("btnTema");
 const btnCopiarLink = document.getElementById("btnCopiarLink");
 
@@ -472,8 +474,8 @@ function desenharLadoALadoPizza() {
   containerGrafico.className = "grafico-pizzas";
   containerGrafico.innerHTML = "";
 
-  const tonsA = gerarTons(0, 68, 10); // Tons de vermelho, um por posição no ranking de Kanto
-  const tonsB = gerarTons(42, 75, 10); // Tons de dourado, um por posição no ranking de Johto
+  const tonsA = gerarTons(11, 82, 10); // Tons de vermelho, um por posição no ranking de Kanto
+  const tonsB = gerarTons(41, 85, 10); // Tons de dourado, um por posição no ranking de Johto
 
   containerGrafico.appendChild(criarPizza(regiaoA, tonsA, "Kanto", 220, "esquerda", () => anterior?.regiaoA));
   containerGrafico.appendChild(criarPizza(regiaoB, tonsB, "Johto", 220, "direita", () => anterior?.regiaoB));
@@ -488,8 +490,8 @@ function desenharRankingGeralPizza() {
   containerGrafico.className = "grafico-pizzas";
   containerGrafico.innerHTML = "";
 
-  const tonsA = gerarTons(0, 68, 10);
-  const tonsB = gerarTons(42, 75, 10);
+  const tonsA = gerarTons(11, 82, 10);
+  const tonsB = gerarTons(41, 85, 10);
 
   // Guarda a posição original de cada pessoa dentro da própria região (0 a 9) e a
   // própria região — a posição decide o tom de cor, e a região decide com qual
@@ -699,8 +701,130 @@ function atualizarResumoComparativo() {
   const percentual = ((maiorTotal - menorTotal) / menorTotal) * 100;
   const percentualFormatado = percentual.toFixed(1).replace(".", ",");
 
-  resumoComparativoEl.textContent = `${maiorNome} está ${percentualFormatado}% à frente de ${menorNome} neste snapshot (somando o Top 10 de cada região).`;
+  // Separado em dois elementos: o número grande vem primeiro (como uma citação em
+  // destaque de reportagem), a legenda embaixo explica o que ele significa
+  resumoNumeroEl.textContent = `${percentualFormatado}%`;
+  resumoLegendaEl.textContent = `${maiorNome} à frente de ${menorNome} neste snapshot — Top 10 de cada região`;
 }
+
+// ===================================================================
+// PÓDIO
+// Monta o top 3 geral (Kanto + Johto combinados) do snapshot atual, com a
+// cabeça da skin de cada jogador. Usa o serviço público minotar.net, que gera
+// a imagem a partir do nome de usuário — precisa de internet pra carregar
+// ===================================================================
+// ===================================================================
+// SKINS PERSONALIZADAS
+// O minotar.net (usado como reserva abaixo) busca a skin pela API oficial da
+// Mojang — só funciona pra contas premium. Se esse for um servidor com contas
+// "cracked"/offline, ele não vai achar a skin de ninguém e vai mostrar o Steve
+// padrão pra todo mundo. Pra esses casos, adicione o jogador aqui manualmente:
+//
+// 1. Ache a skin da pessoa no NameMC (ex: https://namemc.com/skin/HASH)
+// 2. Troque o HASH abaixo pelo mesmo HASH que aparece no final da URL da skin
+//
+// Quem não estiver nesta lista cai automaticamente no minotar.net (que funciona
+// bem se o servidor usa contas oficiais da Mojang)
+const skinsPersonalizadas = {
+  Mahou: "https://s.namemc.com/2d/skin/face.png?id=3d817103f3ef3dc4&scale=4",
+};
+
+// Monta UM pódio (as 3 colunas com cabeça/medalha/nome/valor/degrau) a partir de
+// uma lista de pessoas já ordenada — usa só as 3 primeiras. "titulo" é opcional,
+// usado só no modo "Por Região" pra identificar de qual região é aquele pódio
+function criarPodio(pessoas, titulo) {
+  const grupo = document.createElement("div");
+  grupo.className = "podio-grupo";
+
+  if (titulo) {
+    const tituloEl = document.createElement("h3");
+    tituloEl.className = "podio-titulo";
+    tituloEl.textContent = titulo;
+    grupo.appendChild(tituloEl);
+  }
+
+  const podio = document.createElement("div");
+  podio.className = "podio";
+
+  pessoas.slice(0, 3).forEach((pessoa, indice) => {
+    const posicao = indice + 1; // 1, 2 ou 3
+
+    const lugar = document.createElement("div");
+    lugar.className = `podio-lugar lugar-${posicao}`;
+
+    // A cabeça da skin: primeiro olha se esse nome está em skinsPersonalizadas
+    // (skins definidas manualmente); se não estiver, usa o minotar.net como reserva.
+    // encodeURIComponent evita que nomes com caracteres estranhos (como o
+    // "<impactor:account:name>" que apareceu nos dados) quebrem a URL da imagem
+    const cabeca = document.createElement("img");
+    cabeca.className = "podio-cabeca";
+    cabeca.src =
+      skinsPersonalizadas[pessoa.nome] ||
+      `https://minotar.net/avatar/${encodeURIComponent(pessoa.nome)}/64`;
+    cabeca.alt = pessoa.nome;
+    cabeca.loading = "lazy";
+
+    const medalha = document.createElement("div");
+    medalha.className = "podio-medalha";
+    medalha.textContent = obterMedalha(posicao).trim();
+
+    const nome = document.createElement("div");
+    nome.className = "podio-nome";
+    nome.textContent = pessoa.nome;
+
+    const valor = document.createElement("div");
+    valor.className = "podio-valor";
+    const valorEmMilhoes = pessoa.valor / 1_000_000;
+    valor.textContent = `${valorEmMilhoes.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} KK`;
+
+    // O degrau do pedestal, colorido conforme a região (Kanto/Johto) do jogador
+    const degrau = document.createElement("div");
+    degrau.className = `podio-degrau ${pessoa.regiao}`;
+    degrau.textContent = `${posicao}º`;
+
+    lugar.appendChild(cabeca);
+    lugar.appendChild(medalha);
+    lugar.appendChild(nome);
+    lugar.appendChild(valor);
+    lugar.appendChild(degrau);
+    podio.appendChild(lugar);
+  });
+
+  grupo.appendChild(podio);
+  return grupo;
+}
+
+// Decide QUANTOS pódios mostrar, conforme o modo atual:
+// - "ranking" (Ranking geral): um pódio único com o top 3 combinado das duas regiões
+// - "lado" (Por Região): dois pódios lado a lado, um para Kanto e outro para Johto
+// - "evolucao": nenhum pódio (não existe um "top 3 atual" nesse modo)
+function atualizarPodio() {
+  const { regiaoA, regiaoB } = snapshots[indiceSnapshotAtual];
+  podiosWrapEl.innerHTML = "";
+
+  if (modoAtual === "evolucao") {
+    return;
+  }
+
+  if (modoAtual === "ranking") {
+    const todosComRegiao = [
+      ...regiaoA.map((p) => ({ ...p, regiao: "regiaoA" })),
+      ...regiaoB.map((p) => ({ ...p, regiao: "regiaoB" })),
+    ];
+    todosComRegiao.sort((a, b) => b.valor - a.valor);
+    podiosWrapEl.appendChild(criarPodio(todosComRegiao, null));
+  } else {
+    const kanto = regiaoA.map((p) => ({ ...p, regiao: "regiaoA" }));
+    const johto = regiaoB.map((p) => ({ ...p, regiao: "regiaoB" }));
+    podiosWrapEl.appendChild(criarPodio(kanto, "Kanto"));
+    podiosWrapEl.appendChild(criarPodio(johto, "Johto"));
+  }
+}
+
+
 
 
 // ===================================================================
@@ -909,12 +1033,18 @@ function redesenharGraficoAtual() {
   // O controle Colunas/Pizza só faz sentido em "lado" e "ranking" — no modo evolução ele some
   controlesTipo.style.display = modoAtual === "evolucao" ? "none" : "flex";
 
-  // Só o modo "Ranking geral" ganha um título — é o único gráfico que junta as
-  // duas regiões numa lista só, então vale deixar isso explícito (20 pessoas no total)
-  tituloGrafico.textContent = modoAtual === "ranking" ? "Top 20 — Ranking Geral" : "";
+  // No estilo de uma reportagem de dados, cada gráfico ganha uma legenda de figura
+  // ("FIG. 01 — ..."), como as que aparecem embaixo de imagens em uma matéria
+  const legendasFigura = {
+    lado: "Fig. 01 — Lado a lado, Top 10 por região",
+    ranking: "Fig. 02 — Ranking geral, Top 20 combinado",
+    evolucao: "Fig. 03 — Evolução histórica",
+  };
+  tituloGrafico.textContent = legendasFigura[modoAtual];
 
   // A frase comparativa depende só da data selecionada, não do modo/tipo de gráfico
   atualizarResumoComparativo();
+  atualizarPodio();
 
   // Guarda o estado atual (modo, data, tipo) na URL, pra dar pra compartilhar um link
   // direto que já abre nessa mesma visualização (ver atualizarURL e btnCopiarLink)

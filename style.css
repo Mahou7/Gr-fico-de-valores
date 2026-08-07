@@ -1,44 +1,57 @@
 /* ===================================================================
-   VARIÁVEIS DE TEMA
-   Todas as cores "neutras" do site (fundo, texto, bordas) vêm daqui, em vez de
-   estarem espalhadas pelo arquivo. É isso que permite o botão de tema (🌙/☀️)
-   trocar a aparência inteira só mudando o atributo data-tema na tag <html>
-   (ver script.js). As cores "de marca" (vermelho de Kanto, dourado de Johto,
-   vermelho de destaque dos botões) ficam de fora de propósito — elas não mudam
-   entre os temas, pois são parte da identidade visual, não do "modo claro/escuro".
+   VARIÁVEIS DE TEMA — "Poké-Noite" / "Poké-Dia"
+   Cores neutras (fundo, texto, borda) vêm daqui — é o que permite o botão de
+   tema (🌙/☀️) trocar a aparência inteira só mudando data-tema na tag <html>.
+   --acento (vermelho de Pokébola) é a única cor de UI decorativa — usada com
+   moderação, só no número de destaque do resumo e no estado ativo dos botões.
+   --acento-azul fica reservado só para o selo semântico "NOVO" (um dado, não
+   decoração) — o resto do "chrome" do site (badges, títulos, linhas) é neutro
+   de propósito, pra não competir com o vermelho/dourado que já carregam a tela.
+
+   Tipografia: Press Start 2P é a fonte pixelada de 8-bit — usada só em títulos,
+   rótulos curtos e botões (texto corrido nela seria ilegível). Rubik é a fonte
+   de interface (arredondada, amigável, como os menus modernos da franquia).
+   Space Mono é usada nos números, dando aquele ar de "tela de status/Pokédex".
    =================================================================== */
 :root {
-  --fundo: #0f1115;
-  --fundo-elevado: #14161c; /* Selects, campo de busca */
-  --fundo-trilha: #1a1d24; /* Trilha por trás das barras do gráfico de colunas */
-  --fundo-controle: #1c1f27; /* Fundo do bloco de botões (.controles) */
-  --borda-fraca: #1c1f27; /* Separadores bem sutis (cabeçalho, rodapé) */
-  --borda: #232631; /* Bordas de inputs, selects, linhas de grade do SVG */
-  --borda-forte: #2c2f38; /* Borda do bloco de botões, linha de data do gráfico */
-  --texto: #e9e9ee; /* Texto principal */
-  --texto-suave: #cbd5e1; /* Texto secundário, ainda bem legível */
-  --texto-muted: #9ca3af; /* Texto terciário (subtítulos, botão inativo) */
-  --texto-muted-forte: #6b7280; /* Texto quaternário (rodapé, avisos discretos) */
-  --texto-hover: #b8bcc4; /* Nome da coluna quando destacada (hover/busca) */
-  --texto-hover-forte: #d4d6da; /* Valor da coluna quando destacada (hover/busca) */
+  --fundo: #121212;
+  --fundo-elevado: #1e1e1e;
+  --fundo-trilha: #181818;
+  --borda-fraca: #2c2c2c;
+  --borda: #e8e4da;
+  --borda-forte: #e8e4da;
+  --texto: #ece9e2;
+  --texto-suave: #c7c3ba;
+  --texto-muted: #8f8b84;
+  --texto-muted-forte: #66635d;
+  --texto-hover: #e8e4da;
+  --texto-hover-forte: #ffffff;
+  --acento: #e3350d; /* Vermelho de Pokébola/Kanto — a cor de ação da UI */
+  --acento-azul: #3d7dca; /* Azul de Pokédex — reservado só pro selo "NOVO" */
+  --sombra-botao: #7a1a08; /* Sombra offset fixa (não muda com o tema) dos botões pixelados */
+
+  --fonte-display: 'Press Start 2P', 'Courier New', monospace;
+  --fonte-corpo: 'Rubik', 'Segoe UI', Arial, sans-serif;
+  --fonte-dados: 'Space Mono', 'Courier New', monospace;
 }
 
-/* Tema claro: mesma estrutura, valores invertidos. Ativado via JS colocando
-   data-tema="claro" na tag <html> */
+/* Tema claro ("Poké-Dia"): fundo creme de cartucho, texto e bordas em tinta
+   escura — a mesma lógica de caixa-de-diálogo, só invertida */
 html[data-tema="claro"] {
-  --fundo: #f5f5f7;
-  --fundo-elevado: #ffffff;
-  --fundo-trilha: #e8e8ec;
-  --fundo-controle: #eaeaee;
-  --borda-fraca: #e0e0e5;
-  --borda: #d4d4da;
-  --borda-forte: #c2c2ca;
-  --texto: #16171a;
-  --texto-suave: #33353c;
-  --texto-muted: #5a5c64;
-  --texto-muted-forte: #71737b;
-  --texto-hover: #45474e;
-  --texto-hover-forte: #26272b;
+  --fundo: #f1efe9;
+  --fundo-elevado: #fbfaf7;
+  --fundo-trilha: #e6e2d8;
+  --borda-fraca: #d8d4c8;
+  --borda: #24242a;
+  --borda-forte: #24242a;
+  --texto: #21201d;
+  --texto-suave: #47443e;
+  --texto-muted: #706b62;
+  --texto-muted-forte: #8f8a80;
+  --texto-hover: #121212;
+  --texto-hover-forte: #000000;
+  --acento: #c62a0d;
+  --acento-azul: #2f5f9e;
 }
 
 /* Reset básico: remove margens e espaçamentos padrão que o navegador aplica sozinho */
@@ -46,76 +59,200 @@ html[data-tema="claro"] {
   margin: 0;
   padding: 0;
   box-sizing: border-box; /* Faz com que padding e borda não aumentem o tamanho total do elemento */
+  scrollbar-width: thin; /* Versão fina, para Firefox */
+  scrollbar-color: var(--borda-fraca) var(--fundo); /* Firefox: cor do "trilho" e da "alça" */
+}
+
+/* Versão para Chrome/Edge/Safari (que ignoram as propriedades acima) — sem isso,
+   a barra de rolagem ficava cinza/branca padrão do sistema, destoando do tema escuro */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--fundo);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--borda-fraca);
+  border: 2px solid var(--fundo); /* Cria um respiro entre a "alça" e a borda do trilho */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--acento);
 }
 
 body {
-  font-family: 'Segoe UI', Arial, sans-serif; /* Fonte usada em todo o site */
+  font-family: var(--fonte-corpo);
   background-color: var(--fundo);
   color: var(--texto);
   min-height: 100vh;
   display: flex;
-  flex-direction: column; /* Empilha header, conteúdo e footer, nessa ordem */
+  flex-direction: column; /* Empilha a faixa decorativa, header, conteúdo e footer, nessa ordem */
   transition: background-color 0.25s ease, color 0.25s ease; /* Suaviza a troca de tema */
+}
+
+/* Linha fina no topo da página — um único traço de cor, não uma faixa
+   multicolorida. Discreto o bastante para não competir com o resto da UI */
+.faixa-decorativa {
+  height: 4px;
+  width: 100%;
+  background: var(--acento);
+  flex-shrink: 0;
 }
 
 /* Usamos o ID (#grafico) em vez da classe porque o className desse elemento é
    trocado por completo em JavaScript ao mudar de modo (.grafico, .grafico-pizzas,
-   .grafico-evolucao) — o ID é o único jeito de garantir que essa transição
-   continue valendo em todos os modos, sem precisar repetir a regra em cada um */
+   .grafico-evolucao) — o ID é o único jeito de garantir que essa "moldura de
+   caixa de diálogo" continue valendo em todos os modos, sem repetir a regra.
+   O clip-path corta um degrau nos dois cantos opostos, imitando o corte
+   pixelado de uma janela de jogo 8-bit em vez de um border-radius suave */
 #grafico {
   transition: opacity 0.2s ease;
+  border: 3px solid var(--borda);
+  clip-path: polygon(
+    10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px
+  );
+  background: var(--fundo-elevado);
+  padding: 32px 20px 24px;
 }
 
 /* CABEÇALHO: título de um lado, botões do outro, distribuídos dinamicamente.
    Se não couberem lado a lado (tela estreita), o flex-wrap deixa o botão descer sozinho */
 .cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* Esquerda flexível / centro no tamanho do conteúdo / direita flexível */
   align-items: center;
-  gap: 16px;
-  padding: 20px 32px;
-  border-bottom: 1px solid var(--borda-fraca);
+  gap: 24px;
+  padding: 28px 32px;
+  border-bottom: 3px solid var(--borda);
+}
+
+.cabecalho-textos {
+  justify-self: start;
+}
+
+/* Independente de quanto texto/controles existam nos dois lados, o grid de 3
+   colunas garante que essa coluna do meio fique exatamente centralizada */
+.cabecalho .resumo-comparativo {
+  justify-self: center;
+}
+
+.cabecalho-lateral {
+  justify-self: end;
 }
 
 .cabecalho-textos {
   text-align: left;
 }
 
-.cabecalho h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 8px;
+/* Selo pequeno acima do título — contorno neutro em vez de preenchido, pra
+   não competir com o vermelho/dourado que já carregam o resto da página */
+.kicker {
+  display: inline-block;
+  font-family: var(--fonte-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-muted);
+  background: transparent;
+  border: 2px solid var(--borda-fraca);
+  padding: 5px 8px;
+  margin-bottom: 14px;
+  line-height: 1;
 }
 
-/* Estiliza as palavras "Kanto" e "Johto" dentro do título, cada uma na cor da sua região */
+.cabecalho h1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2em 0.5em;
+  line-height: 1.3;
+  margin-bottom: 14px;
+}
+
+/* A frase de abertura, em corpo normal — o título "cresce" dela para os
+   nomes das regiões, que são o verdadeiro assunto do título */
+.titulo-lead {
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--texto-muted);
+}
+
+/* Os nomes das regiões: aqui mora o peso visual do título, em pixel art —
+   tamanho reduzido em relação a uma fonte comum, porque cada "pixel" da
+   fonte já é bem largo por natureza */
+.destaque {
+  font-family: var(--fonte-display);
+  font-size: clamp(1rem, 3.4vw, 1.5rem);
+  text-shadow: 3px 3px 0 var(--borda); /* Contorno grosso, como o logotipo de um jogo antigo */
+}
+
 .destaque-kanto {
-  color: #ef4444;
+  color: #e3350d;
 }
 
 .destaque-johto {
-  color: #d4a017;
+  color: #f4b731;
+}
+
+/* O "VS" entre os nomes: neutro, texto pequeno — o peso de cor já está nos
+   nomes das regiões ao redor, não precisa de mais um preenchimento colorido */
+.versus {
+  font-family: var(--fonte-display);
+  font-size: 0.6rem;
+  color: var(--texto-muted);
+  background: transparent;
+  border: 2px solid var(--borda-fraca);
+  padding: 4px 6px;
 }
 
 .subtitulo {
-  color: var(--texto-muted);
+  font-family: var(--fonte-corpo);
+  color: var(--texto-suave);
   font-size: 0.95rem;
 }
 
-/* Frase dinâmica comparando o total das duas regiões no snapshot atual (ver script.js) */
+/* RESUMO COMPARATIVO: um "painel de status", como a tela que mostra o placar
+   de uma batalha — número grande em pixel, descrição pequena ao lado */
 .resumo-comparativo {
-  color: var(--texto-suave);
-  font-size: 0.85rem;
-  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  max-width: 460px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 3px solid var(--borda);
+  background: var(--fundo-elevado);
+}
+
+.resumo-numero {
+  font-family: var(--fonte-display);
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
+  line-height: 1;
+  color: var(--acento);
+}
+
+.resumo-legenda {
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
+  font-size: 0.76rem;
+  color: var(--texto-muted);
+  line-height: 1.35;
+  max-width: 220px;
 }
 
 /* Linha discreta com o seletor de data (o "backup" de snapshots antigos) */
 .atualizado {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 6px;
+  gap: 8px;
+  font-family: var(--fonte-corpo);
   font-size: 0.78rem;
+  font-weight: 500;
   color: var(--texto-muted-forte);
 }
 
@@ -123,22 +260,22 @@ body {
   appearance: none; /* Remove o visual nativo do navegador, mesmo motivo do .botao */
   -webkit-appearance: none;
   background: var(--fundo-elevado);
-  color: var(--texto-muted);
-  border: 1px solid var(--borda);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-family: inherit;
-  font-size: 0.78rem;
+  color: var(--texto-suave);
+  border: 2px solid var(--borda);
+  border-radius: 0;
+  padding: 4px 8px;
+  font-family: var(--fonte-dados); /* Datas em mono, como um carimbo de save file */
+  font-size: 0.76rem;
   cursor: pointer;
 }
 
 .atualizado select:hover {
-  border-color: var(--borda-forte);
+  border-color: var(--acento);
 }
 
 .atualizado select:focus-visible {
-  outline: 2px solid #ee1515;
-  outline-offset: 1px;
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
 }
 
 /* No modo "Evolução" o seletor de data é desabilitado (ver script.js) — aqui ele
@@ -150,97 +287,122 @@ body {
 
 /* Contador de dias até a próxima atualização esperada (7 dias após a data mais recente) */
 .proxima-atualizacao {
-  margin-top: 4px;
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
   font-size: 0.78rem;
   color: var(--texto-muted-forte);
 }
 
 /* Agrupa os botões de modo e o botão de tema, para os dois ficarem juntos à direita */
+/* Coluna direita do cabeçalho: agrupa os botões de modo/tema e o seletor de
+   data/contador, empilhados — antes eles estavam espalhados de formas diferentes,
+   deixando a coluna esquerda bem mais alta que a direita e um vazio embaixo */
+.cabecalho-lateral {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
 .cabecalho-controles {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
-/* Um único bloco arredondado (o "botão"), sem espaço entre as duas metades — daí o
-   overflow: hidden, que corta os cantos internos dos botões e deixa só os da pílula externa */
+/* Seletor de data e contador de atualização, alinhados à direita como o resto
+   da coluna lateral */
+.cabecalho-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* CONTROLES: um bloco único com abas grudadas, como o seletor de menu de um
+   jogo — divisórias internas em vez de espaço entre os botões */
 .controles {
   display: flex;
-  background: var(--fundo-controle);
-  border: 1px solid var(--borda-forte);
-  border-radius: 999px;
-  overflow: hidden;
+  border: 3px solid var(--borda);
+  background: var(--fundo-elevado);
 }
 
 .botao {
   appearance: none; /* Remove o visual nativo que o navegador/sistema aplicaria (a "caixa branca") */
   -webkit-appearance: none; /* Mesma coisa, mas para navegadores baseados em WebKit (Safari) */
   background: transparent;
-  color: var(--texto-muted); /* Lado não selecionado fica apagado, simbolizando que está desativado */
+  color: var(--texto-muted); /* Aba não selecionada fica apagada, simbolizando que está desativada */
   border: none;
-  padding: 9px 22px;
+  border-right: 2px solid var(--borda-fraca);
+  padding: 10px 14px;
   cursor: pointer;
-  font-family: inherit; /* Sem isso, alguns navegadores usam a fonte padrão do sistema no botão */
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-family: var(--fonte-display); /* Fonte pixelada — texto de botão de menu de jogo de verdade */
+  font-size: 0.55rem;
   letter-spacing: 0.02em;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+  line-height: 1.4;
+  transition: color 0.2s ease, background 0.15s ease;
 }
 
-/* Ao passar o mouse no lado desativado: ele clareia, sinalizando que é clicável */
+.controles .botao:last-child {
+  border-right: none;
+}
+
+/* Ao passar o mouse na aba desativada: ela clareia, sinalizando que é clicável */
 .botao:hover {
   color: var(--texto);
+  background: var(--borda-fraca);
 }
 
-/* Ao clicar: um leve encolhimento, dá a sensação tátil de "pressionar" */
-.botao:active {
-  transform: scale(0.95);
-}
-
-/* Contorno visível ao navegar pelo teclado (Tab), importante para acessibilidade.
-   Fica para dentro (offset negativo) para não vazar pra fora do bloco único */
+/* Contorno visível ao navegar pelo teclado (Tab), importante para acessibilidade */
 .botao:focus-visible {
-  outline: 2px solid #ee1515;
-  outline-offset: -3px;
+  outline: 2px solid var(--acento);
+  outline-offset: -4px;
 }
 
-/* Classe aplicada via JavaScript no lado selecionado no momento: ganha fundo cheio
-   e vira a parte "destacada" do botão único. Vermelho da Pokébola: uma cor neutra em
-   relação a Kanto/Johto, já que não é nem o vermelho do Kanto nem o dourado do Johto */
+/* Classe aplicada via JavaScript na aba selecionada no momento: preenche com a
+   cor de acento, como o item destacado de um menu de jogo */
 .botao.ativo {
-  background: #ee1515;
-  color: #f5f5f5;
+  background: var(--acento);
+  color: #fff8ec;
 }
 
 .botao.ativo:hover {
-  color: #f5f5f5; /* Já está destacado, então o hover não precisa clarear mais o texto */
+  background: var(--acento);
+  color: #fff8ec;
 }
 
-/* Botão de alternar tema — redondo, discreto, mesma "família" visual dos outros controles */
+/* Botão de alternar tema — quadrado, mesma "família" pixelada dos outros controles */
 .botao-tema {
   appearance: none;
   -webkit-appearance: none;
-  width: 38px;
-  height: 38px;
-  background: var(--fundo-controle);
-  border: 1px solid var(--borda-forte);
-  border-radius: 50%;
-  font-size: 1rem;
+  width: 42px;
+  height: 42px;
+  background: var(--fundo-elevado);
+  border: 3px solid var(--borda);
+  border-radius: 0;
+  font-size: 1.05rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s ease, transform 0.15s ease;
+  box-shadow: 3px 3px 0 var(--sombra-botao);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .botao-tema:hover {
-  border-color: #ee1515;
+  border-color: var(--acento);
 }
 
 .botao-tema:active {
-  transform: scale(0.92);
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.botao-tema:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
 }
 
 /* CONTEÚDO PRINCIPAL: cresce para ocupar o espaço vertical entre header e footer (flex: 1),
@@ -251,7 +413,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center; /* Centraliza verticalmente no espaço disponível */
-  gap: 32px;
+  gap: 22px;
   width: 100%;
   padding: 32px 16px;
 }
@@ -266,7 +428,6 @@ body {
   align-items: flex-end; /* Alinha todas as colunas pela base, como um gráfico de barras de verdade */
   justify-content: space-between; /* Espalha as colunas usando toda a largura disponível da tela */
   gap: clamp(10px, 2.5vw, 18px); /* O espaço entre colunas encolhe em telas menores */
-  padding: 24px 8px 8px; /* O padding de cima dá espaço para o valor numérico não ser cortado */
 }
 
 /* Cada coluna representa uma pessoa/posição no ranking */
@@ -280,8 +441,8 @@ body {
   cursor: pointer; /* Sinaliza que a coluna reage ao mouse, mesmo sem nenhum clique acontecer */
 }
 
-/* Caixa que fica embaixo de cada coluna, alinhada com a trilha/barra. Agora empilha
-   o nome E o selo de variação (▲/▼/NOVO), por isso virou flex-column */
+/* Caixa que fica embaixo de cada coluna, alinhada com a trilha/barra. Empilha
+   o nome E o selo de variação (▲/▼/NOVO), por isso é flex-column */
 .nome-pessoa {
   width: 100%;
   display: flex;
@@ -296,6 +457,8 @@ body {
   display: block;
   width: 100%;
   text-align: center;
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
   font-size: clamp(0.6rem, 1.6vw, 0.78rem);
   color: var(--texto-suave);
   white-space: nowrap;
@@ -318,7 +481,7 @@ body {
   max-width: 44px; /* Impede que a barra fique enorme em telas muito largas */
   height: clamp(140px, 32vh, 240px); /* A altura se adapta ao tamanho vertical da tela */
   background-color: var(--fundo-trilha);
-  border-radius: 6px;
+  border: 2px solid var(--borda-fraca);
   padding: 3px; /* Esse respiro é o que separa a barra colorida da base da trilha */
   display: flex;
   align-items: flex-end; /* Empurra a barra para baixo, fazendo ela "crescer" de baixo para cima */
@@ -330,7 +493,6 @@ body {
    deslocar a base da barra (que precisa continuar encostada na trilha) */
 .barra {
   width: 100%;
-  border-radius: 4px 4px 0 0; /* Arredonda só o topo da barra, a base fica reta encostada na trilha */
   transition: height 0.6s ease; /* Anima a barra "crescendo" quando o gráfico é montado */
   min-height: 4px; /* Garante que mesmo valores pequenos apareçam como uma barrinha visível */
   position: relative; /* Necessário para o valor numérico se posicionar sempre no topo da barra */
@@ -355,13 +517,15 @@ body {
   }
 }
 
-/* Valor numérico exibido flutuando acima do topo da barra */
+/* Valor numérico exibido flutuando acima do topo da barra, em mono — como o
+   contador de dano numa tela de batalha */
 .valor-barra {
   position: absolute;
   top: -20px; /* Sobe o texto para ficar logo acima do topo atual da barra */
   left: 50%;
   transform: translateX(-50%); /* Centraliza o texto horizontalmente sobre a barra */
-  font-size: 0.7rem;
+  font-family: var(--fonte-dados);
+  font-size: 0.66rem;
   color: var(--texto);
   white-space: nowrap; /* Impede que o número quebre linha */
   transition: color 0.2s ease;
@@ -369,37 +533,170 @@ body {
 
 .linha-grafico:hover .valor-barra {
   color: var(--texto-hover-forte);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* Cor usada para todas as barras de Kanto — remete ao vermelho de Pokémon Red */
+/* Cor usada para todas as barras de Kanto — o vermelho exato de Pokémon Red */
 .regiaoA {
-  background-color: #dc2626;
+  background-color: #e3350d;
 }
 
-/* Cor usada para todas as barras de Johto — remete ao dourado de Pokémon Gold */
+/* Cor usada para todas as barras de Johto — o dourado exato de Pokémon Gold */
 .regiaoB {
-  background-color: #d4a017;
+  background-color: #f4b731;
 }
 
-/* Controle secundário (Colunas/Pizza): mesma aparência do controle principal (.controles) */
+/* Controle secundário (Colunas/Pizza): mesma aparência do controle principal (.controles),
+   com largura fixa igual à busca de jogador ao lado — antes cada um tinha um
+   tamanho "natural" diferente, o que deixava a linha com aparência descentralizada */
 .controles-tipo {
   margin: 0;
+  width: 220px;
 }
 
-/* Título que aparece só no modo "Ranking geral" (ver script.js), esclarecendo
-   que aquele gráfico junta as 20 pessoas (top 10 de cada região) */
+.controles-tipo .botao {
+  flex: 1; /* Os dois botões dividem a largura fixa do container igualmente */
+  text-align: center;
+}
+
+/* Título que aparece só no modo "Ranking geral" — rótulo de menu pixelado */
 .titulo-grafico {
   width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
   text-align: center;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--texto-suave);
-  margin-bottom: -4px; /* Aproxima do gráfico, já que o .conteudo já tem gap entre os filhos */
+  font-family: var(--fonte-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--texto-muted);
 }
 
 .titulo-grafico:empty {
-  display: none; /* Não ocupa espaço quando está vazio (modos "lado" e "evolução") */
+  display: none; /* Não ocupa espaço quando está vazio */
+}
+
+/* PÓDIO: top 3 do snapshot atual, cada um com a cabeça da skin, nome e valor.
+   Ordem visual 2º-1º-3º (o clássico "degrau" de pódio), controlada via CSS order —
+   no HTML os três vêm sempre na ordem 1º/2º/3º (mais simples de montar no JavaScript) */
+
+/* Container externo: acomoda tanto um pódio único (modo Ranking geral) quanto
+   dois pódios lado a lado, um por região (modo Por Região) */
+.podios-wrap {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.podios-wrap:empty {
+  display: none; /* Não ocupa espaço enquanto o JavaScript não preencheu (ou no modo Evolução) */
+}
+
+.podio-grupo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Título acima de cada pódio — usado só no modo "Por Região" (Kanto/Johto),
+   pra identificar de qual região é aquele pódio específico */
+.podio-titulo {
+  font-family: var(--fonte-display);
+  font-size: 0.65rem;
+  color: var(--texto-muted);
+}
+
+.podio {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+}
+
+.podio-lugar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 120px;
+}
+
+/* A ordem visual: 2º à esquerda, 1º no meio, 3º à direita */
+.podio-lugar.lugar-1 {
+  order: 2;
+}
+
+.podio-lugar.lugar-2 {
+  order: 1;
+}
+
+.podio-lugar.lugar-3 {
+  order: 3;
+}
+
+/* A cabeça da skin do jogador. image-rendering: pixelated evita o navegador
+   "borrar" a imagem ao ampliar — mantém o visual quadriculado autêntico do jogo */
+.podio-cabeca {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #c7c7c7;
+  image-rendering: pixelated;
+  background: var(--fundo-trilha); /* Aparece como "moldura" enquanto a imagem carrega */
+}
+
+.podio-lugar.lugar-1 .podio-cabeca {
+  width: 64px;
+  height: 64px;
+}
+
+.podio-medalha {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.podio-nome {
+  font-family: var(--fonte-corpo);
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--texto);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.podio-valor {
+  font-family: var(--fonte-dados);
+  font-size: 0.68rem;
+  color: var(--texto-muted);
+}
+
+/* O "degrau" do pedestal embaixo de cada jogador — altura diferente por posição,
+   como um pódio de verdade. A cor de fundo já indica a região (Kanto/Johto) */
+.podio-degrau {
+  width: 100%;
+  border: 3px solid var(--borda);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fonte-display);
+  font-size: 1rem;
+  color: var(--fundo);
+}
+
+.podio-lugar.lugar-1 .podio-degrau {
+  height: 64px;
+}
+
+.podio-lugar.lugar-2 .podio-degrau {
+  height: 46px;
+}
+
+.podio-lugar.lugar-3 .podio-degrau {
+  height: 32px;
 }
 
 /* Linha que junta o controle Colunas/Pizza e a busca de jogador, lado a lado —
@@ -410,22 +707,22 @@ body {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
-/* Campo de busca: mesma linguagem visual dos outros controles do site (fundo escuro,
-   pílula arredondada), pra não parecer um elemento de formulário genérico */
+/* Campo de busca: mesmo tratamento pixelado (fundo elevado, borda grossa) dos
+   outros controles do site */
 .busca-jogador {
   appearance: none;
   -webkit-appearance: none;
   background: var(--fundo-elevado);
   color: var(--texto);
-  border: 1px solid var(--borda);
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-family: inherit;
+  border: 2px solid var(--borda);
+  border-radius: 0;
+  padding: 8px 12px;
+  font-family: var(--fonte-corpo);
   font-size: 0.82rem;
-  width: 200px;
+  width: 220px;
   max-width: 55vw;
 }
 
@@ -434,7 +731,7 @@ body {
 }
 
 .busca-jogador:focus-visible {
-  outline: 2px solid #ee1515;
+  outline: 2px solid var(--acento);
   outline-offset: 1px;
 }
 
@@ -461,12 +758,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .pizza-titulo {
-  font-size: 1rem;
-  font-weight: 600;
+  font-family: var(--fonte-display);
+  font-size: 0.75rem;
   color: var(--texto);
 }
 
@@ -506,7 +803,7 @@ body {
    do próprio centro da fatia, em vez do canto do SVG inteiro */
 .fatia-pizza {
   stroke: var(--fundo); /* Um contorno fino separa visualmente as fatias entre si */
-  stroke-width: 1.5;
+  stroke-width: 2;
   cursor: pointer;
   transform-box: fill-box;
   transform-origin: center;
@@ -546,20 +843,22 @@ body {
 
 .pizza-rotulo-fundo {
   fill: var(--fundo);
-  opacity: 0.88;
+  stroke: var(--borda);
+  stroke-width: 2;
+  opacity: 0.94;
 }
 
 .pizza-rotulo-nome {
   fill: var(--texto);
-  font-family: inherit;
+  font-family: var(--fonte-corpo);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-anchor: middle;
 }
 
 .pizza-rotulo-porcentagem {
   fill: var(--texto-muted);
-  font-family: inherit;
+  font-family: var(--fonte-dados);
   font-size: 12px;
   text-anchor: middle;
 }
@@ -568,10 +867,13 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  font-family: var(--fonte-corpo);
   font-size: 0.75rem;
   color: var(--texto-suave);
-  max-width: 200px;
+  width: 200px; /* Fixo (não só um máximo) — garante que as duas pizzas fiquem
+    simétricas na tela, mesmo quando os nomes de um lado são mais compridos */
+  flex-shrink: 0;
 }
 
 .pizza-legenda li {
@@ -584,7 +886,7 @@ body {
 .pizza-swatch {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border: 1px solid var(--borda-fraca);
   flex-shrink: 0;
   display: inline-block;
 }
@@ -607,15 +909,15 @@ body {
 
 /* Linhas horizontais de referência no fundo do gráfico (valores) */
 .linha-guia {
-  stroke: var(--borda);
+  stroke: var(--borda-fraca);
   stroke-width: 1;
 }
 
 /* O número escrito ao lado de cada linha horizontal, mostrando a que valor ela corresponde */
 .rotulo-valor {
   fill: var(--texto-muted-forte);
-  font-family: inherit;
-  font-size: 17px;
+  font-family: var(--fonte-dados);
+  font-size: 16px;
   text-anchor: end; /* O texto termina exatamente onde a linha começa, ficando bem alinhado */
 }
 
@@ -623,7 +925,7 @@ body {
    Tracejada (dashed) e mais discreta que a linha de valor, para não competir com as
    linhas de evolução (que são o elemento principal do gráfico) */
 .linha-data {
-  stroke: var(--borda-forte);
+  stroke: var(--borda-fraca);
   stroke-width: 1;
   stroke-dasharray: 4 4;
 }
@@ -638,11 +940,11 @@ body {
 }
 
 .linha-evolucao.regiaoA {
-  stroke: #dc2626;
+  stroke: #e3350d;
 }
 
 .linha-evolucao.regiaoB {
-  stroke: #d4a017;
+  stroke: #f4b731;
 }
 
 /* Os pontos (círculos) em cima de cada linha, um por data registrada.
@@ -661,18 +963,18 @@ body {
 }
 
 .ponto-evolucao.regiaoA {
-  fill: #dc2626;
+  fill: #e3350d;
 }
 
 .ponto-evolucao.regiaoB {
-  fill: #d4a017;
+  fill: #f4b731;
 }
 
 /* Rótulos de data no eixo X, embaixo do gráfico */
 .rotulo-eixo {
   fill: var(--texto-muted);
-  font-family: inherit;
-  font-size: 20px;
+  font-family: var(--fonte-dados);
+  font-size: 18px;
   text-anchor: middle; /* Centraliza o texto exatamente sobre a coordenada X do ponto */
 }
 
@@ -681,6 +983,8 @@ body {
   display: flex;
   justify-content: center;
   gap: 24px;
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
   font-size: 0.85rem;
   color: var(--texto-suave);
 }
@@ -694,33 +998,34 @@ body {
 .cor-legenda {
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border: 1px solid var(--borda-fraca);
   display: inline-block;
 }
 
 /* SELOS DE VARIAÇÃO (▲/▼ desde a atualização anterior, ou "NOVO" no Top 10).
-   Cores semânticas (verde/vermelho/azul) — ficam iguais nos dois temas de propósito */
+   Em mono (são dados), cores semânticas fixas nos dois temas de propósito */
 .selo-variacao {
+  font-family: var(--fonte-dados);
   font-size: 0.6rem;
   font-weight: 700;
   padding: 1px 5px;
-  border-radius: 999px;
+  border: 1px solid currentColor;
   white-space: nowrap;
 }
 
 .selo-alta {
-  color: #16a34a;
-  background: rgba(74, 222, 128, 0.16);
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.14);
 }
 
 .selo-baixa {
-  color: #dc2626;
-  background: rgba(248, 113, 113, 0.16);
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.14);
 }
 
 .selo-novo {
-  color: #0284c7;
-  background: rgba(56, 189, 248, 0.18);
+  color: var(--acento-azul);
+  background: rgba(61, 125, 202, 0.16);
 }
 
 /* Na legenda da pizza, empurra o selo para a ponta direita da linha */
@@ -761,7 +1066,7 @@ body {
 
 .linha-grafico.toque-ativo .valor-barra {
   color: var(--texto-hover-forte);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .fatia-pizza.toque-ativo {
@@ -776,7 +1081,8 @@ body {
   max-width: 700px;
   margin: 0 auto;
   text-align: center;
-  font-size: 0.75rem;
+  font-family: var(--fonte-corpo);
+  font-size: 0.78rem;
   color: var(--texto-muted-forte);
 }
 
@@ -785,29 +1091,36 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
   margin-top: 4px;
 }
 
-/* Botão de baixar o gráfico como imagem PNG / copiar o link da visualização atual */
+/* Botão de baixar o gráfico como imagem PNG / copiar o link — mesmo tratamento
+   pixelado com sombra offset dos outros botões do site */
 .botao-baixar {
   appearance: none;
   -webkit-appearance: none;
-  background: transparent;
+  background: var(--fundo-elevado);
   color: var(--texto-muted);
-  border: 1px solid var(--borda);
-  border-radius: 999px;
-  padding: 8px 18px;
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border: 2px solid var(--borda);
+  border-radius: 0;
+  padding: 8px 16px;
+  font-family: var(--fonte-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  box-shadow: 3px 3px 0 var(--sombra-botao);
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .botao-baixar:hover {
   color: var(--texto);
-  border-color: var(--borda-forte);
+  border-color: var(--acento);
+}
+
+.botao-baixar:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
 }
 
 /* Estado enquanto a imagem está sendo gerada (ver script.js) — evita a sensação
@@ -815,24 +1128,28 @@ body {
 .botao-baixar:disabled {
   opacity: 0.6;
   cursor: wait;
+  transform: none;
+  box-shadow: 3px 3px 0 var(--sombra-botao);
 }
 
-/* RODAPÉ: fica sempre na base da tela (o flex-column do body + o flex:1 do .conteudo cuidam disso),
-   mesmo em páginas com pouco conteúdo. Espaço reservado para créditos, contato, links etc. */
+/* RODAPÉ: fica sempre na base da tela (o flex-column do body + o flex:1 do
+   .conteudo cuidam disso), mesmo em páginas com pouco conteúdo */
 .rodape {
-  border-top: 1px solid var(--borda-fraca);
+  border-top: 3px solid var(--borda);
   padding: 18px 32px;
   text-align: center;
+  font-family: var(--fonte-corpo);
   color: var(--texto-muted-forte);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
 .rodape-contato a {
-  color: #ee1515; /* Mesma cor de destaque usada no resto do site, para manter consistência */
+  color: var(--acento);
   text-decoration: none;
+  font-weight: 600;
 }
 
 .rodape-contato a:hover {
@@ -841,27 +1158,85 @@ body {
 
 /* Dica discreta dos atalhos de teclado, no rodapé */
 .atalhos-dica {
-  font-size: 0.72rem;
+  font-family: var(--fonte-dados);
+  font-size: 0.68rem;
   color: var(--texto-muted-forte);
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 /* Em telas muito estreitas (celular), encolher 20 colunas até caber deixaria tudo ilegível.
    Nesse caso específico, priorizamos a legibilidade: as colunas voltam a ter um tamanho
    mínimo fixo, e a rolagem horizontal (que evitamos no resto do site) é a solução aqui. */
 @media (max-width: 640px) {
+  .podio {
+    gap: 6px;
+  }
+
+  .podio-lugar {
+    width: 88px;
+  }
+
+  .podio-cabeca {
+    width: 36px;
+    height: 36px;
+  }
+
+  .podio-lugar.lugar-1 .podio-cabeca {
+    width: 48px;
+    height: 48px;
+  }
+
+  .podio-nome {
+    font-size: 0.68rem;
+  }
+
   .pizza-linha,
   .pizza-linha-invertida {
     flex-direction: column; /* Empilha em vez de lado a lado — não há largura sobrando no celular */
   }
 
+  .pizza-legenda {
+    width: 100%;
+    max-width: 240px;
+  }
+
   .cabecalho {
-    justify-content: center;
+    grid-template-columns: 1fr; /* Uma coluna só, tudo empilhado */
+    justify-items: center;
     text-align: center;
   }
 
   .cabecalho-textos {
+    justify-self: center;
     text-align: center;
+  }
+
+  .cabecalho h1 {
+    justify-content: center;
+  }
+
+  .cabecalho .resumo-comparativo {
+    justify-self: center;
+  }
+
+  .cabecalho-lateral {
+    justify-self: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .cabecalho-controles {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .cabecalho-meta {
+    align-items: center;
+  }
+
+  .resumo-comparativo {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .grafico {
